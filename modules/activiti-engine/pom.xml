@@ -138,6 +138,12 @@
       <scope>test</scope>
     </dependency>
     
+    <!-- TODO this includes more than just the javax.ws.rs.* API -->
+    <dependency>
+        <groupId>com.sun.jersey</groupId>
+        <artifactId>jersey-core</artifactId>
+        <version>${jersey.version}</version>
+    </dependency>
   </dependencies>
   
   <repositories>
@@ -169,6 +175,7 @@
       org.drools*;resolution:=optional,
       com.fasterxml*;resolution:=optional,
     </activiti.osgi.import.additional>
+    <jersey.version>1.12</jersey.version>
   </properties>
 
   <build>

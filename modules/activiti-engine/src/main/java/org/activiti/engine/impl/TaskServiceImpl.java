@@ -20,6 +20,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+
 import org.activiti.engine.ActivitiIllegalArgumentException;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.impl.cmd.AddCommentCmd;
@@ -64,7 +72,9 @@ import org.activiti.engine.task.TaskQuery;
 /**
  * @author Tom Baeyens
  * @author Joram Barrez
+ * @author Tim Stephenson
  */
+@Path("/tasks")
 public class TaskServiceImpl extends ServiceImpl implements TaskService {
 
   public Task newTask() {
@@ -81,7 +91,10 @@ public class TaskServiceImpl extends ServiceImpl implements TaskService {
     commandExecutor.execute(new SaveTaskCmd(task));
   }
   
-  public void deleteTask(String taskId) {
+  @DELETE
+  @Path(value = "/{id}")
+  @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+  public void deleteTask(@PathParam("{id}") String taskId) {
     commandExecutor.execute(new DeleteTaskCmd(taskId, null, false));
   }
   
@@ -107,7 +120,7 @@ public class TaskServiceImpl extends ServiceImpl implements TaskService {
     commandExecutor.execute(new DeleteTaskCmd(taskIds, deleteReason, false));
   }
 
-  public void setAssignee(String taskId, String userId) {
+  public void setAssignee(@PathParam("{id}") String taskId, String userId) {
     commandExecutor.execute(new AddIdentityLinkCmd(taskId, userId, null, IdentityLinkType.ASSIGNEE));
   }
   
@@ -156,7 +169,11 @@ public class TaskServiceImpl extends ServiceImpl implements TaskService {
     commandExecutor.execute(cmd);
   }
 
-  public void complete(String taskId) {
+  @POST
+  @Path(value = "/{id}")
+  @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+  @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+  public void complete(@PathParam("{id}") String taskId) {
     commandExecutor.execute(new CompleteTaskCmd(taskId, null));
   }
   

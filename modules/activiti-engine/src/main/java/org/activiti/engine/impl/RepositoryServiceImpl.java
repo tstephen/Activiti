@@ -14,10 +14,25 @@
 package org.activiti.engine.impl;
 
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.List;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.engine.ActivitiException;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.cmd.ActivateProcessDefinitionCmd;
 import org.activiti.engine.impl.cmd.AddEditorSourceExtraForModelCmd;
@@ -59,7 +74,9 @@ import org.activiti.engine.task.IdentityLink;
  * @author Tom Baeyens
  * @author Falko Menge
  * @author Joram Barrez
+ * @author Tim Stephenson
  */
+@Path("/repository")
 public class RepositoryServiceImpl extends ServiceImpl implements RepositoryService {
 
   public DeploymentBuilder createDeployment() {
@@ -70,7 +87,31 @@ public class RepositoryServiceImpl extends ServiceImpl implements RepositoryServ
     return commandExecutor.execute(new DeployCmd<Deployment>(deploymentBuilder));
   }
 
-  public void deleteDeployment(String deploymentId) {
+  @PUT
+  @Path(value = "/{name}")
+  @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+  @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+  public Response deploy(@PathParam("name") String resourceName,
+      String definition) {
+    Deployment deployment = createDeployment().addString(resourceName,
+	definition).deploy();
+
+    try {
+      // TODO need to inject the base URL
+      URI location = new URI("http://TODO/" + deployment.getId());
+      return Response.created(location).build();
+    } catch (URISyntaxException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      throw new ActivitiException("Oops!");
+    }
+
+  }
+
+  @DELETE
+  @Path(value = "/deployment/{id}")
+  @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+  public void deleteDeployment(@PathParam("{id}") String deploymentId) {
     commandExecutor.execute(new DeleteDeploymentCmd(deploymentId, false));
   }
 
@@ -86,8 +127,12 @@ public class RepositoryServiceImpl extends ServiceImpl implements RepositoryServ
     return new ProcessDefinitionQueryImpl(commandExecutor);
   }
 
+  @GET
+  @Path(value = "/deployment/{id}")
+  @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
   @SuppressWarnings("unchecked")
-  public List<String> getDeploymentResourceNames(String deploymentId) {
+  public List<String> getDeploymentResourceNames(
+      @PathParam("{id}") String deploymentId) {
     return commandExecutor.execute(new GetDeploymentResourceNamesCmd(deploymentId));
   }
 
@@ -99,7 +144,11 @@ public class RepositoryServiceImpl extends ServiceImpl implements RepositoryServ
     return new DeploymentQueryImpl(commandExecutor);
   }
 
-  public ProcessDefinition getProcessDefinition(String processDefinitionId) {
+  @GET
+  @Path(value = "/definition/{id}")
+  @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+  public ProcessDefinition getProcessDefinition(
+      @PathParam("{id}") String processDefinitionId) {
     return commandExecutor.execute(new GetDeploymentProcessDefinitionCmd(processDefinitionId));
   }
   
@@ -111,7 +160,14 @@ public class RepositoryServiceImpl extends ServiceImpl implements RepositoryServ
     return commandExecutor.execute(new GetDeploymentProcessDefinitionCmd(processDefinitionId));
   }
 
-  public void suspendProcessDefinitionById(String processDefinitionId) {
+  @POST
+  @Path(value = "/definition/{id}")
+  // TODO check this is legitimate use of FormParam, more usually used to
+  // identify method params. If so combine with activateProcessDefinitionById as
+  // new method delgating to existing.
+  @FormParam(value = "suspend")
+  @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+  public void suspendProcessDefinitionById(@PathParam("{id") String processDefinitionId) {
     commandExecutor.execute(new SuspendProcessDefinitionCmd(processDefinitionId, null, false, null));
   }
   
