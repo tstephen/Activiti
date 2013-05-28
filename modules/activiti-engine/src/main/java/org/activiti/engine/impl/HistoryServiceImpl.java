@@ -14,6 +14,8 @@
 
 package org.activiti.engine.impl;
 
+import javax.ws.rs.Path;
+
 import org.activiti.engine.HistoryService;
 import org.activiti.engine.history.HistoricActivityInstanceQuery;
 import org.activiti.engine.history.HistoricDetailQuery;
@@ -30,7 +32,9 @@ import org.activiti.engine.impl.cmd.DeleteHistoricTaskInstanceCmd;
  * @author Tom Baeyens
  * @author Bernd Ruecker (camunda)
  * @author Christian Stettler
+ * @author Tim Stephenson
  */
+@Path("/history")
 public class HistoryServiceImpl extends ServiceImpl implements HistoryService {
 
   public HistoricProcessInstanceQuery createHistoricProcessInstanceQuery() {
