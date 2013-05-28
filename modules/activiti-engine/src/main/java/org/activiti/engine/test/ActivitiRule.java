@@ -279,10 +279,10 @@ public class ActivitiRule extends TestWatchman {
    * @return task
    */
   public Task assertGroupCandidateTaskExists(String taskName, String group,
-      String descriptionLike, int priority, List<String> groups) {
+      int priority, List<String> groups) {
     List<Task> tasks = getTaskService().createTaskQuery()
-	.taskCandidateGroupIn(groups).taskName(taskName)
-	.taskDescriptionLike(descriptionLike).taskPriority(priority).list();
+	.taskCandidateGroupIn(groups).taskName(taskName).taskPriority(priority)
+	.list();
     assertEquals("Unexpected no. of tasks named '" + taskName + "'", 1,
 	tasks.size());
     return tasks.get(0);
@@ -295,10 +295,9 @@ public class ActivitiRule extends TestWatchman {
    * @return task
    */
   public Task assertAssignedTaskExists(String taskName, String assignee,
-      String descriptionLike, int priority) {
+      int priority) {
     List<Task> tasks = getTaskService().createTaskQuery()
 	.taskAssignee(assignee).taskName(taskName)
-	.taskDescriptionLike(descriptionLike)
 	.taskPriority(priority)
 	.list();
     assertEquals("Unexpected no. of tasks named '" + taskName + "'", 1,
