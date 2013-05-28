@@ -13,7 +13,14 @@
 
 package org.activiti.engine.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import org.activiti.engine.FormService;
 import org.activiti.engine.HistoryService;
@@ -23,8 +30,14 @@ import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
+import org.activiti.engine.history.HistoricActivityInstance;
 import org.activiti.engine.impl.test.TestHelper;
 import org.activiti.engine.impl.util.ClockUtil;
+import org.activiti.engine.runtime.Job;
+import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.runtime.ProcessInstanceQuery;
+import org.activiti.engine.task.IdentityLink;
+import org.activiti.engine.task.Task;
 import org.junit.rules.TestWatchman;
 import org.junit.runners.model.FrameworkMethod;
 
@@ -62,11 +75,21 @@ import org.junit.runners.model.FrameworkMethod;
  * reset to use the current system time rather then the time that was set during 
  * a test method.  In other words, you don't have to clean up your own time messing mess ;-)
  * </p>
- *  
+ * 
+ * <p>Also supports Activiti-related assertions in tests (see assert* methods) 
+ * and a number of convenient test helpers:
+ * <ul>
+ * <li>{@link ActivitiRule#dumpProcessState(String)}
+ * <li>{@link ActivitiRule#reassignTask(String, String, String)}
+ * <li>{@link ActivitiRule#replaceCandidateUserForTask(String, String, String)}
+ * 
+ * 
  * @author Tom Baeyens
+ * @author Tim Stephenson
  */
 public class ActivitiRule extends TestWatchman {
 
+  private static final String SEP = System.getProperty("line.separator");
   protected String configurationResource = "activiti.cfg.xml";
   protected String deploymentId = null;
 
@@ -192,5 +215,119 @@ public class ActivitiRule extends TestWatchman {
   
   public void setManagementService(ManagementService managementService) {
     this.managementService = managementService;
+  }
+
+  public void dumpProcessState(String piid, Writer out) throws IOException {
+    ProcessInstanceQuery query = runtimeService.createProcessInstanceQuery()
+	.processInstanceId(piid);
+    List<ProcessInstance> list = query.list();
+    if (list.size() == 1) {
+      ProcessInstance pi = list.get(0);
+      out.write("process instance: " + pi.getId() + SEP);
+      out.write("... ended?: " + pi.isEnded() + SEP);
+
+      List<Job> jobList = managementService.createJobQuery()
+	  .processInstanceId(piid).list();
+      for (Job job : jobList) {
+	out.write("job: " + job.getId() + ", " + job.getExceptionMessage()
+	    + SEP);
+      }
+
+      List<Task> list2 = taskService.createTaskQuery().processInstanceId(piid)
+	  .list();
+      for (Task task : list2) {
+	out.write("...task: " + task.getName());
+	if (task.getAssignee() == null
+	    || task.getAssignee().trim().length() == 0) {
+	  List<IdentityLink> identityLinksForTask = taskService
+	      .getIdentityLinksForTask(task.getId());
+	  for (IdentityLink identityLink : identityLinksForTask) {
+	    out.write("group=" + identityLink.getGroupId() + ",user="
+		+ identityLink.getUserId() + ";");
+	  }
+	  out.write(SEP);
+	} else {
+	  out.write(", assignee: " + task.getAssignee() + SEP);
+	}
+      }
+
+      Map<String, Object> variables = runtimeService.getVariables(piid);
+      for (Map.Entry<String, Object> entry : variables.entrySet()) {
+	out.write(entry.getKey() + " = " + entry.getValue());
+      }
+    } else {
+      assertEquals(0, list.size());
+      out.write("found '" + list.size() + "' proc instances, assume ended"
+	  + SEP);
+    }
+
+    out.write("History info for process: " + piid + SEP);
+    List<HistoricActivityInstance> activityHistory = historyService
+	.createHistoricActivityInstanceQuery().processInstanceId(piid).list();
+    for (HistoricActivityInstance ai : activityHistory) {
+      out.write("..." + ai.getActivityName() + "("
+	  + ai.getActivityType() + "): assigned to: " + ai.getAssignee()
+	  + ", complete?: "
+	  + (ai.getEndTime() == null ? "outstanding" : ai.getEndTime()) + SEP);
+    }
+  }
+
+  /**
+   * Assert that <em>one and only one</em> task matches the parameters and
+   * return its id.
+   * 
+   * @return task
+   */
+  public Task assertGroupCandidateTaskExists(String taskName, String group,
+      String descriptionLike, int priority, List<String> groups) {
+    List<Task> tasks = getTaskService().createTaskQuery()
+	.taskCandidateGroupIn(groups).taskName(taskName)
+	.taskDescriptionLike(descriptionLike).taskPriority(priority).list();
+    assertEquals("Unexpected no. of tasks named '" + taskName + "'", 1,
+	tasks.size());
+    return tasks.get(0);
+  }
+
+  /**
+   * Assert that <em>one and only one</em> task matches the parameters and
+   * return its id.
+   * 
+   * @return task
+   */
+  public Task assertAssignedTaskExists(String taskName, String assignee,
+      String descriptionLike, int priority) {
+    List<Task> tasks = getTaskService().createTaskQuery()
+	.taskAssignee(assignee).taskName(taskName)
+	.taskDescriptionLike(descriptionLike)
+	.taskPriority(priority)
+	.list();
+    assertEquals("Unexpected no. of tasks named '" + taskName + "'", 1,
+	tasks.size());
+    return tasks.get(0);
+  }
+
+  public void replaceCandidateUserForTask(String taskId, String currentUser,
+      String newUser) {
+    Task task = taskService.createTaskQuery().taskCandidateUser(currentUser)
+	.taskId(taskId).singleResult();
+    taskService.deleteCandidateUser(task.getId(), currentUser);
+    taskService.addCandidateUser(task.getId(), newUser);
+  }
+
+  public void reassignTask(String taskName, String currentAssignee,
+      String newAssignee) {
+    List<Task> list = taskService.createTaskQuery()
+	.taskAssignee(currentAssignee).taskName(taskName).list();
+    for (Task task : list) {
+      task.setAssignee(newAssignee);
+      taskService.saveTask(task);
+    }
+  }
+
+  public void assertComplete(String piid) {
+    ProcessInstance result = getRuntimeService()
+	.createProcessInstanceQuery()
+	.processInstanceId(piid).singleResult();
+    assertTrue(result.isEnded());
   }
 }
