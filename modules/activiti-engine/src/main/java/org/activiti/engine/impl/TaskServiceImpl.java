@@ -22,8 +22,6 @@ import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -61,7 +59,6 @@ import org.activiti.engine.impl.cmd.SetTaskDueDateCmd;
 import org.activiti.engine.impl.cmd.SetTaskPriorityCmd;
 import org.activiti.engine.impl.cmd.SetTaskVariablesCmd;
 import org.activiti.engine.impl.persistence.entity.TaskEntity;
-import org.activiti.engine.runtime.TaskBean;
 import org.activiti.engine.task.Attachment;
 import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.Event;
@@ -80,8 +77,6 @@ import org.activiti.engine.task.TaskQuery;
 @Path("/tasks")
 public class TaskServiceImpl extends ServiceImpl implements TaskService {
 
-  private static final int DEFAULT_PAGE_SIZE = 50;
-
   public Task newTask() {
     return newTask(null);
   }
@@ -99,7 +94,7 @@ public class TaskServiceImpl extends ServiceImpl implements TaskService {
   @DELETE
   @Path(value = "/{id}")
   @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-  public void deleteTask(@PathParam("id") String taskId) {
+  public void deleteTask(@PathParam("{id}") String taskId) {
     commandExecutor.execute(new DeleteTaskCmd(taskId, null, false));
   }
   
@@ -125,7 +120,7 @@ public class TaskServiceImpl extends ServiceImpl implements TaskService {
     commandExecutor.execute(new DeleteTaskCmd(taskIds, deleteReason, false));
   }
 
-  public void setAssignee(@PathParam("id") String taskId, String userId) {
+  public void setAssignee(@PathParam("{id}") String taskId, String userId) {
     commandExecutor.execute(new AddIdentityLinkCmd(taskId, userId, null, IdentityLinkType.ASSIGNEE));
   }
   
@@ -178,7 +173,7 @@ public class TaskServiceImpl extends ServiceImpl implements TaskService {
   @Path(value = "/{id}")
   @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
   @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-  public void complete(@PathParam("id") String taskId) {
+  public void complete(@PathParam("{id}") String taskId) {
     commandExecutor.execute(new CompleteTaskCmd(taskId, null));
   }
   
@@ -214,72 +209,6 @@ public class TaskServiceImpl extends ServiceImpl implements TaskService {
     return new NativeTaskQueryImpl(commandExecutor);
   }
   
-  @GET
-  @Path(value = "/personal/{userId}/assigned")
-  @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-  @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-  public List<TaskBean> getAssignedTasks(@PathParam("userId") String userId) {
-    return TaskBean.toList(createTaskQuery().taskAssignee(userId).list());
-  }
-
-  @POST
-  @Path(value = "/personal/{userId}/assigned")
-  @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-  @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-  public List<TaskBean> getAssignedTasks(@PathParam("userId") String userId,
-      @FormParam("first") int first, @FormParam("max") int max) {
-    if (max == 0) {
-      max = DEFAULT_PAGE_SIZE;
-    }
-    return TaskBean.toList(createTaskQuery().taskAssignee(userId).listPage(
-	first, max));
-  }
-
-  @GET
-  @Path(value = "/personal/{userId}/offered")
-  @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-  @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-  public List<TaskBean> getOfferedTasks(@PathParam("userId") String userId) {
-    return TaskBean.toList(createTaskQuery().taskCandidateUser(userId).list());
-  }
-
-  @POST
-  @Path(value = "/personal/{userId}/offered")
-  @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-  @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-  public List<TaskBean> getOfferedTasks(@PathParam("userId") String userId,
-      @FormParam("first") int first, @FormParam("max") int max) {
-    if (max == 0) {
-      max = DEFAULT_PAGE_SIZE;
-    }
-    return TaskBean.toList(createTaskQuery().taskCandidateUser(userId).listPage(
-	first, max));
-  }
-
-  @GET
-  @Path(value = "/team/{groupId}")
-  @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-  @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-  public List<TaskBean> getOfferedGroupTasks(
-      @PathParam("groupId") String groupId) {
-    return TaskBean
-	.toList(createTaskQuery().taskCandidateGroup(groupId).list());
-  }
-
-  @POST
-  @Path(value = "/team/{groupId}")
-  @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-  @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-  public List<TaskBean> getOfferedGroupTasks(
-      @PathParam("groupId") String groupId, @FormParam("first") int first,
-      @FormParam("max") int max) {
-    if (max == 0) {
-      max = DEFAULT_PAGE_SIZE;
-    }
-    return TaskBean.toList(createTaskQuery().taskCandidateGroup(groupId)
-	.listPage(first, max));
-  }
-
   public Map<String, Object> getVariables(String executionId) {
     return commandExecutor.execute(new GetTaskVariablesCmd(executionId, null, false));
   }
@@ -406,13 +335,4 @@ public class TaskServiceImpl extends ServiceImpl implements TaskService {
     return commandExecutor.execute(new GetSubTasksCmd(parentTaskId));
   }
 
-  @GET
-  @Path(value = "/{id}")
-  @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-  public Task getTask(@PathParam("id") String taskId) {
-    System.out.println("taskId: " + taskId);
-    TaskEntity task = new TaskEntity(taskId);
-    return task;
-    // return createTaskQuery().taskId(taskId).singleResult();
-  }
 }

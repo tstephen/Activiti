@@ -20,7 +20,6 @@ import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -51,7 +50,6 @@ import org.activiti.engine.runtime.ExecutionQuery;
 import org.activiti.engine.runtime.NativeExecutionQuery;
 import org.activiti.engine.runtime.NativeProcessInstanceQuery;
 import org.activiti.engine.runtime.ProcessInstance;
-import org.activiti.engine.runtime.ProcessInstanceBean;
 import org.activiti.engine.runtime.ProcessInstanceQuery;
 import org.activiti.engine.task.IdentityLink;
 
@@ -67,11 +65,9 @@ public class RuntimeServiceImpl extends ServiceImpl implements RuntimeService {
   @Path(value = "/{key}")
   @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
   @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-  public ProcessInstanceBean startProcessInstanceByKey(
-      @PathParam("key") String processDefinitionKey) {
-    return new ProcessInstanceBean(
-	commandExecutor.execute(new StartProcessInstanceCmd<ProcessInstance>(
-	    processDefinitionKey, null, null, null)));
+  public ProcessInstance startProcessInstanceByKey(
+      @PathParam("{key}") String processDefinitionKey) {
+    return commandExecutor.execute(new StartProcessInstanceCmd<ProcessInstance>(processDefinitionKey, null, null, null));
   }
 
   public ProcessInstance startProcessInstanceByKey(String processDefinitionKey, String businessKey) {
@@ -87,8 +83,8 @@ public class RuntimeServiceImpl extends ServiceImpl implements RuntimeService {
   @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
   @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
   public ProcessInstance startProcessInstanceByKey(
-      @PathParam("key") String processDefinitionKey,
-      @PathParam("name") String businessKey, Map<String, Object> variables) {
+      @PathParam("{key}") String processDefinitionKey,
+      @PathParam("{name}") String businessKey, Map<String, Object> variables) {
     return commandExecutor.execute(new StartProcessInstanceCmd<ProcessInstance>(processDefinitionKey, null, businessKey, variables));
   }
   
@@ -112,8 +108,8 @@ public class RuntimeServiceImpl extends ServiceImpl implements RuntimeService {
   @Path(value = "/{id}")
   @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
   @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-  public void deleteProcessInstance(@PathParam("id") String processInstanceId,
-      String deleteReason) {
+  public void deleteProcessInstance(
+      @PathParam("{id}") String processInstanceId, String deleteReason) {
     commandExecutor.execute(new DeleteProcessInstanceCmd(processInstanceId, deleteReason));
   }
 
@@ -121,19 +117,6 @@ public class RuntimeServiceImpl extends ServiceImpl implements RuntimeService {
     return new ExecutionQueryImpl(commandExecutor);
   }
   
-  @GET
-  @Path(value = "/{key}/{id}")
-  @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-  @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-  public ProcessInstanceBean getProcessInstance(
-      @PathParam("key") String processDefinitionKey,
-      @PathParam("id") String processInstanceId) {
-    ProcessInstance pi = (ProcessInstance) createExecutionQuery()
-	.processDefinitionKey(processDefinitionKey)
-	.processInstanceId(processInstanceId).singleResult();
-    return new ProcessInstanceBean(pi);
-  }
-
   public NativeExecutionQuery createNativeExecutionQuery() {
     return new NativeExecutionQueryImpl(commandExecutor);
   }

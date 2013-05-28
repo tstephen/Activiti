@@ -15,6 +15,7 @@ package org.activiti.engine.impl;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.List;
 
@@ -22,7 +23,6 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -30,7 +30,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
 
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.engine.ActivitiException;
@@ -67,7 +66,6 @@ import org.activiti.engine.repository.DiagramLayout;
 import org.activiti.engine.repository.Model;
 import org.activiti.engine.repository.ModelQuery;
 import org.activiti.engine.repository.ProcessDefinition;
-import org.activiti.engine.repository.ProcessDefinitionBean;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.activiti.engine.task.IdentityLink;
 
@@ -90,32 +88,30 @@ public class RepositoryServiceImpl extends ServiceImpl implements RepositoryServ
   }
 
   @PUT
-  @Path(value = "/definition/{name}")
+  @Path(value = "/{name}")
   @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
   @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
   public Response deploy(@PathParam("name") String resourceName,
-      @HeaderParam("Host") String host, String definition) {
-    System.out.println("deploy");
-    try {
-      Deployment deployment = createDeployment().addString(resourceName,
-	  definition.trim()).deploy();
+      String definition) {
+    Deployment deployment = createDeployment().addString(resourceName,
+	definition).deploy();
 
-      URI location = UriBuilder.fromResource(getClass())
-	  .path("/definition/{id}").build(deployment.getId());
+    try {
+      // TODO need to inject the base URL
+      URI location = new URI("http://TODO/" + deployment.getId());
       return Response.created(location).build();
-    } catch (ActivitiException e) {
-      throw e;
-    } catch (Exception e) {
+    } catch (URISyntaxException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
       throw new ActivitiException("Oops!");
     }
+
   }
 
   @DELETE
   @Path(value = "/deployment/{id}")
   @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-  public void deleteDeployment(@PathParam("id") String deploymentId) {
+  public void deleteDeployment(@PathParam("{id}") String deploymentId) {
     commandExecutor.execute(new DeleteDeploymentCmd(deploymentId, false));
   }
 
@@ -132,36 +128,12 @@ public class RepositoryServiceImpl extends ServiceImpl implements RepositoryServ
   }
 
   @GET
-  @Path(value = "/definitions")
-  @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-  public List<ProcessDefinitionBean> getProcessDefinitions() {
-    return ProcessDefinitionBean.toList(createProcessDefinitionQuery().list());
-  }
-
-  @POST
-  @Path(value = "/definitions")
-  @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-  public List<ProcessDefinitionBean> getProcessDefinitionPage(
-      @FormParam("firstResult") int firstResult,
-      @FormParam("maxResults") int maxResults) {
-    if (maxResults == 0) {
-      maxResults = 50;
-    }
-    return ProcessDefinitionBean.toList(createProcessDefinitionQuery()
-	.listPage(firstResult, maxResults));
-  }
-
-  @GET
   @Path(value = "/deployment/{id}")
   @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
   @SuppressWarnings("unchecked")
   public List<String> getDeploymentResourceNames(
-      @PathParam("id") String deploymentId) {
-    System.out.println("getDeploymentResourceNames: " + deploymentId);
-    List list = commandExecutor.execute(new GetDeploymentResourceNamesCmd(
-	deploymentId));
-    System.out.println("list: " + list);
-    return list;
+      @PathParam("{id}") String deploymentId) {
+    return commandExecutor.execute(new GetDeploymentResourceNamesCmd(deploymentId));
   }
 
   public InputStream getResourceAsStream(String deploymentId, String resourceName) {
@@ -176,10 +148,8 @@ public class RepositoryServiceImpl extends ServiceImpl implements RepositoryServ
   @Path(value = "/definition/{id}")
   @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
   public ProcessDefinition getProcessDefinition(
-      @PathParam("id") String processDefinitionId) {
-    return new ProcessDefinitionBean(
-	commandExecutor.execute(new GetDeploymentProcessDefinitionCmd(
-	    processDefinitionId)));
+      @PathParam("{id}") String processDefinitionId) {
+    return commandExecutor.execute(new GetDeploymentProcessDefinitionCmd(processDefinitionId));
   }
   
   public BpmnModel getBpmnModel(String processDefinitionId) {
@@ -197,8 +167,7 @@ public class RepositoryServiceImpl extends ServiceImpl implements RepositoryServ
   // new method delgating to existing.
   @FormParam(value = "suspend")
   @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-  public void suspendProcessDefinitionById(
-      @PathParam("id") String processDefinitionId) {
+  public void suspendProcessDefinitionById(@PathParam("{id") String processDefinitionId) {
     commandExecutor.execute(new SuspendProcessDefinitionCmd(processDefinitionId, null, false, null));
   }
   
