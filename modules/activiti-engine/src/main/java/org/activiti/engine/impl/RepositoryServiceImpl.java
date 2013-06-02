@@ -56,6 +56,7 @@ import org.activiti.engine.impl.cmd.GetModelCmd;
 import org.activiti.engine.impl.cmd.GetModelEditorSourceCmd;
 import org.activiti.engine.impl.cmd.GetModelEditorSourceExtraCmd;
 import org.activiti.engine.impl.cmd.SaveModelCmd;
+import org.activiti.engine.impl.cmd.SetProcessDefinitionCategoryCmd;
 import org.activiti.engine.impl.cmd.SuspendProcessDefinitionCmd;
 import org.activiti.engine.impl.persistence.entity.ModelEntity;
 import org.activiti.engine.impl.pvm.ReadOnlyProcessDefinition;
@@ -66,11 +67,13 @@ import org.activiti.engine.repository.DeploymentQuery;
 import org.activiti.engine.repository.DiagramLayout;
 import org.activiti.engine.repository.Model;
 import org.activiti.engine.repository.ModelQuery;
+import org.activiti.engine.repository.NativeDeploymentQuery;
+import org.activiti.engine.repository.NativeModelQuery;
+import org.activiti.engine.repository.NativeProcessDefinitionQuery;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.repository.ProcessDefinitionBean;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.activiti.engine.task.IdentityLink;
-
 
 /**
  * @author Tom Baeyens
@@ -131,6 +134,7 @@ public class RepositoryServiceImpl extends ServiceImpl implements RepositoryServ
     return new ProcessDefinitionQueryImpl(commandExecutor);
   }
 
+<<<<<<< HEAD
   @GET
   @Path(value = "/definitions")
   @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
@@ -154,6 +158,13 @@ public class RepositoryServiceImpl extends ServiceImpl implements RepositoryServ
   @GET
   @Path(value = "/deployment/{id}")
   @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+=======
+  @Override
+  public NativeProcessDefinitionQuery createNativeProcessDefinitionQuery() {
+    return new NativeProcessDefinitionQueryImpl(commandExecutor);
+  }
+
+>>>>>>> 60b620e53dfb173b6f7f089c1e18cda57adf9b61
   @SuppressWarnings("unchecked")
   public List<String> getDeploymentResourceNames(
       @PathParam("id") String deploymentId) {
@@ -172,6 +183,7 @@ public class RepositoryServiceImpl extends ServiceImpl implements RepositoryServ
     return new DeploymentQueryImpl(commandExecutor);
   }
 
+<<<<<<< HEAD
   @GET
   @Path(value = "/definition/{id}")
   @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
@@ -180,6 +192,15 @@ public class RepositoryServiceImpl extends ServiceImpl implements RepositoryServ
     return new ProcessDefinitionBean(
 	commandExecutor.execute(new GetDeploymentProcessDefinitionCmd(
 	    processDefinitionId)));
+=======
+  @Override
+  public NativeDeploymentQuery createNativeDeploymentQuery() {
+    return new NativeDeploymentQueryImpl(commandExecutor);
+  }
+
+  public ProcessDefinition getProcessDefinition(String processDefinitionId) {
+    return commandExecutor.execute(new GetDeploymentProcessDefinitionCmd(processDefinitionId));
+>>>>>>> 60b620e53dfb173b6f7f089c1e18cda57adf9b61
   }
   
   public BpmnModel getBpmnModel(String processDefinitionId) {
@@ -229,6 +250,10 @@ public class RepositoryServiceImpl extends ServiceImpl implements RepositoryServ
   public void activateProcessDefinitionByKey(String processDefinitionKey, boolean activateProcessInstances, Date activationDate) {
     commandExecutor.execute(new ActivateProcessDefinitionCmd(null, processDefinitionKey, activateProcessInstances, activationDate));
   }
+  
+  public void setProcessDefinitionCategory(String processDefinitionId, String category) {
+    commandExecutor.execute(new SetProcessDefinitionCategoryCmd(processDefinitionId, category)); 
+  }
 
   public InputStream getProcessModel(String processDefinitionId) {
     return commandExecutor.execute(new GetDeploymentProcessModelCmd(processDefinitionId));
@@ -265,7 +290,12 @@ public class RepositoryServiceImpl extends ServiceImpl implements RepositoryServ
   public ModelQuery createModelQuery() {
     return new ModelQueryImpl(commandExecutor);
   }
-  
+
+  @Override
+  public NativeModelQuery createNativeModelQuery() {
+    return new NativeModelQueryImpl(commandExecutor);
+  }
+
   public Model getModel(String modelId) {
     return commandExecutor.execute(new GetModelCmd(modelId));
   }
