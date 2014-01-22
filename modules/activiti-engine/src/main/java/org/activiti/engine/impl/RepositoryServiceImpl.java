@@ -134,7 +134,6 @@ public class RepositoryServiceImpl extends ServiceImpl implements RepositoryServ
     return new ProcessDefinitionQueryImpl(commandExecutor);
   }
 
-<<<<<<< HEAD
   @GET
   @Path(value = "/definitions")
   @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
@@ -155,24 +154,17 @@ public class RepositoryServiceImpl extends ServiceImpl implements RepositoryServ
 	.listPage(firstResult, maxResults));
   }
 
-  @GET
-  @Path(value = "/deployment/{id}")
-  @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-=======
   @Override
   public NativeProcessDefinitionQuery createNativeProcessDefinitionQuery() {
     return new NativeProcessDefinitionQueryImpl(commandExecutor);
   }
 
->>>>>>> 60b620e53dfb173b6f7f089c1e18cda57adf9b61
-  @SuppressWarnings("unchecked")
+  @GET
+  @Path(value = "/deployment/{id}")
+  @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })  @SuppressWarnings("unchecked")
   public List<String> getDeploymentResourceNames(
       @PathParam("id") String deploymentId) {
-    System.out.println("getDeploymentResourceNames: " + deploymentId);
-    List list = commandExecutor.execute(new GetDeploymentResourceNamesCmd(
-	deploymentId));
-    System.out.println("list: " + list);
-    return list;
+    return commandExecutor.execute(new GetDeploymentResourceNamesCmd(deploymentId));
   }
 
   public InputStream getResourceAsStream(String deploymentId, String resourceName) {
@@ -183,7 +175,11 @@ public class RepositoryServiceImpl extends ServiceImpl implements RepositoryServ
     return new DeploymentQueryImpl(commandExecutor);
   }
 
-<<<<<<< HEAD
+  @Override
+  public NativeDeploymentQuery createNativeDeploymentQuery() {
+    return new NativeDeploymentQueryImpl(commandExecutor);
+  }
+
   @GET
   @Path(value = "/definition/{id}")
   @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
@@ -192,15 +188,6 @@ public class RepositoryServiceImpl extends ServiceImpl implements RepositoryServ
     return new ProcessDefinitionBean(
 	commandExecutor.execute(new GetDeploymentProcessDefinitionCmd(
 	    processDefinitionId)));
-=======
-  @Override
-  public NativeDeploymentQuery createNativeDeploymentQuery() {
-    return new NativeDeploymentQueryImpl(commandExecutor);
-  }
-
-  public ProcessDefinition getProcessDefinition(String processDefinitionId) {
-    return commandExecutor.execute(new GetDeploymentProcessDefinitionCmd(processDefinitionId));
->>>>>>> 60b620e53dfb173b6f7f089c1e18cda57adf9b61
   }
   
   public BpmnModel getBpmnModel(String processDefinitionId) {
