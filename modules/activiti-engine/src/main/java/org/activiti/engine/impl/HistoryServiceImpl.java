@@ -68,14 +68,11 @@ public class HistoryServiceImpl extends ServiceImpl implements HistoryService {
     return new HistoricVariableInstanceQueryImpl(commandExecutor);
   }
 
-<<<<<<< Updated upstream
   @Override
   public NativeHistoricVariableInstanceQuery createNativeHistoricVariableInstanceQuery() {
     return new NativeHistoricVariableInstanceQueryImpl(commandExecutor);
   }
 
-=======
->>>>>>> Stashed changes
   public void deleteHistoricTaskInstance(String taskId) {
     commandExecutor.execute(new DeleteHistoricTaskInstanceCmd(taskId));
   }

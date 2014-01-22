@@ -38,6 +38,8 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.runtime.ProcessInstanceQuery;
 import org.activiti.engine.task.IdentityLink;
 import org.activiti.engine.task.Task;
+import org.activiti.engine.impl.util.ClockUtil;
+import org.activiti.engine.test.mock.ActivitiMockSupport;
 import org.junit.rules.TestWatchman;
 import org.junit.runners.model.FrameworkMethod;
 
@@ -102,6 +104,8 @@ public class ActivitiRule extends TestWatchman {
   protected ManagementService managementService;
   protected FormService formService;
   
+  protected ActivitiMockSupport mockSupport;
+ 
   public ActivitiRule() {
   }
 
@@ -211,6 +215,14 @@ public class ActivitiRule extends TestWatchman {
   
   public FormService getFormService() {
     return formService;
+  }
+
+  public ActivitiMockSupport getMockSupport() {
+    return mockSupport;
+  }
+
+  public ActivitiMockSupport mockSupport() {
+    return mockSupport;
   }
   
   public void setManagementService(ManagementService managementService) {
