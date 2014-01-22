@@ -20,7 +20,7 @@ import org.activiti.bpmn.model.BaseElement;
 import org.activiti.bpmn.model.BoundaryEvent;
 import org.activiti.bpmn.model.ErrorEventDefinition;
 import org.activiti.bpmn.model.EventDefinition;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Tijs Rademakers
@@ -88,6 +88,6 @@ public class BoundaryEventXMLConverter extends BaseBpmnXMLConverter {
   @Override
   protected void writeAdditionalChildElements(BaseElement element, XMLStreamWriter xtw) throws Exception {
     BoundaryEvent boundaryEvent = (BoundaryEvent) element;
-    writeEventDefinitions(boundaryEvent.getEventDefinitions(), xtw);
+    writeEventDefinitions(boundaryEvent, boundaryEvent.getEventDefinitions(), xtw);
   }
 }

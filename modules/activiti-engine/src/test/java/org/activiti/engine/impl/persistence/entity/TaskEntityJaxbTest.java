@@ -9,6 +9,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class TaskEntityJaxbTest {
@@ -18,6 +19,7 @@ public class TaskEntityJaxbTest {
   }
 
   @Test
+  @Ignore
   public void testMinimalEntity() {
     TaskEntity task = new TaskEntity("task1");
     StringWriter out = new StringWriter();

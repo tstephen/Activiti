@@ -41,6 +41,16 @@ import org.activiti.engine.test.Deployment;
  */
 public class RuntimeServiceTest extends PluggableActivitiTestCase {
 
+  @Deployment(resources={"org/activiti/engine/test/api/oneTaskProcess.bpmn20.xml"})
+  public void testStartProcessInstanceWithVariables() {
+    Map<String, Object> vars = new HashMap<String, Object>();
+    vars.put("basicType", new DummySerializable());
+    runtimeService.startProcessInstanceByKey("oneTaskProcess", vars);
+    Task task = taskService.createTaskQuery().includeProcessVariables().singleResult();
+    assertNotNull(task.getProcessVariables());
+  }
+  
+  
   public void testStartProcessInstanceByKeyNullKey() {
     try {
       runtimeService.startProcessInstanceByKey(null);
@@ -119,12 +129,10 @@ public class RuntimeServiceTest extends PluggableActivitiTestCase {
     "org/activiti/engine/test/api/oneTaskProcess.bpmn20.xml"})
   public void testNonUniqueBusinessKey() {
     runtimeService.startProcessInstanceByKey("oneTaskProcess", "123");
-    try {
-      runtimeService.startProcessInstanceByKey("oneTaskProcess", "123");
-      fail("Non-unique business key used, this should fail");
-    } catch(Exception e) {
-      
-    }
+    
+    // Behaviour changed: http://jira.codehaus.org/browse/ACT-1860
+    runtimeService.startProcessInstanceByKey("oneTaskProcess", "123");
+    assertEquals(2, runtimeService.createProcessInstanceQuery().processInstanceBusinessKey("123").count());
   }
   
   // some databases might react strange on having mutiple times null for the business key

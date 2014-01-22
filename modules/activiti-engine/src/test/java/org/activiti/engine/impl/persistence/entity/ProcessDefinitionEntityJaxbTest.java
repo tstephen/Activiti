@@ -9,6 +9,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class ProcessDefinitionEntityJaxbTest {
@@ -18,6 +19,7 @@ public class ProcessDefinitionEntityJaxbTest {
   }
 
   @Test
+  @Ignore
   public void testMinimalEntity() {
     ProcessDefinitionEntity pd = new ProcessDefinitionEntity();
     StringWriter out = new StringWriter();

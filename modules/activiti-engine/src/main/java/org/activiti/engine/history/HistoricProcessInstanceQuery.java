@@ -157,6 +157,15 @@ public interface HistoricProcessInstanceQuery extends Query<HistoricProcessInsta
   
   /** Only select historic process instance that are started by the given user. */
   HistoricProcessInstanceQuery startedBy(String userId);
+  
+	/** Only select process instances that have the given tenant id. */
+  HistoricProcessInstanceQuery processInstanceTenantId(String tenantId);
+
+	/** Only select process instances with a tenant id like the given one. */
+  HistoricProcessInstanceQuery processInstanceTenantIdLike(String tenantIdLike);
+	
+	/** Only select process instances that do not have a tenant id. */
+  HistoricProcessInstanceQuery processInstanceWithoutTenantId();
 
   /** Order by the process instance id (needs to be followed by {@link #asc()} or {@link #desc()}). */
   HistoricProcessInstanceQuery orderByProcessInstanceId();
@@ -176,10 +185,18 @@ public interface HistoricProcessInstanceQuery extends Query<HistoricProcessInsta
   /** Order by the duration of the process instance (needs to be followed by {@link #asc()} or {@link #desc()}). */
   HistoricProcessInstanceQuery orderByProcessInstanceDuration();
   
+	/** Order by tenant id (needs to be followed by {@link #asc()} or {@link #desc()}). */
+  HistoricProcessInstanceQuery orderByTenantId();
+  
   /** Only select historic process instances started by the given process
    * instance. {@link ProcessInstance) ids and {@link HistoricProcessInstance}
    * ids match. */
   HistoricProcessInstanceQuery superProcessInstanceId(String superProcessInstanceId);
+  
+  /**
+   * Exclude sub processes from the query result;
+   */
+  HistoricProcessInstanceQuery excludeSubprocesses(boolean excludeSubprocesses);
 
   // below is deprecated and should be removed in 5.12
 
@@ -200,4 +217,9 @@ public interface HistoricProcessInstanceQuery extends Query<HistoricProcessInsta
   /** Only select historic process instances that were finished on provided date.
    * @deprecated will be removed in 5.12, use {@link #startedAfter(Date)} and {@link #startedBefore(Date)} instead */
   HistoricProcessInstanceQuery finishDateOn(Date date);
+  
+  /**
+   * Include process variables in the process query result
+   */
+  HistoricProcessInstanceQuery includeProcessVariables();
 }

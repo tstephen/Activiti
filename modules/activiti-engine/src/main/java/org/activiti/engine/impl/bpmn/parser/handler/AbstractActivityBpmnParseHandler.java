@@ -22,7 +22,7 @@ import org.activiti.engine.impl.bpmn.behavior.MultiInstanceActivityBehavior;
 import org.activiti.engine.impl.bpmn.parser.BpmnParse;
 import org.activiti.engine.impl.el.ExpressionManager;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 
 /**
@@ -89,6 +89,11 @@ public abstract class AbstractActivityBpmnParseHandler<T extends FlowNode> exten
     // activiti:elementVariable
     if (StringUtils.isNotEmpty(loopCharacteristics.getElementVariable())) {
       miActivityBehavior.setCollectionElementVariable(loopCharacteristics.getElementVariable());
+    }
+
+    // activiti:elementIndexVariable
+    if (StringUtils.isNotEmpty(loopCharacteristics.getElementIndexVariable())) {
+      miActivityBehavior.setCollectionElementIndexVariable(loopCharacteristics.getElementIndexVariable());
     }
 
     // Validation

@@ -24,6 +24,7 @@ import java.io.StringWriter;
 import javax.ws.rs.core.MediaType;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sun.jersey.api.client.WebResource;
@@ -63,6 +64,7 @@ public class RestTest extends JerseyTest {
    * @throws java.lang.Exception
    */
   @Test
+  @Ignore
   public void testSimpleProcess() throws Exception {
     WebResource webResource = resource();
     String responseMsg = null;

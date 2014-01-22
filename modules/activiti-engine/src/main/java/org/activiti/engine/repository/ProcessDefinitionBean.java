@@ -122,4 +122,8 @@ public class ProcessDefinitionBean implements ProcessDefinition {
     return this.processDefinition.getDescription();
   }
 
+  @Override
+  public String getTenantId() {
+    return processDefinition.getTenantId();
+  }
 }

@@ -13,17 +13,15 @@
 
 package org.activiti.engine.impl.persistence.entity;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.activiti.engine.ActivitiException;
-import org.activiti.engine.identity.Group;
-import org.activiti.engine.identity.User;
 import org.activiti.engine.impl.Page;
 import org.activiti.engine.impl.ProcessDefinitionQueryImpl;
 import org.activiti.engine.impl.persistence.AbstractManager;
 import org.activiti.engine.repository.ProcessDefinition;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -98,6 +96,13 @@ public class ProcessDefinitionEntityManager extends AbstractManager {
 
   public long findProcessDefinitionCountByNativeQuery(Map<String, Object> parameterMap) {
     return (Long) getDbSqlSession().selectOne("selectProcessDefinitionCountByNativeQuery", parameterMap);
+  }
+  
+  public void updateProcessDefinitionTenantIdForDeployment(String deploymentId, String newTenantId) {
+  	HashMap<String, Object> params = new HashMap<String, Object>();
+  	params.put("deploymentId", deploymentId);
+  	params.put("tenantId", newTenantId);
+  	getDbSqlSession().update("updateProcessDefinitionTenantIdForDeploymentId", params);
   }
  
 }

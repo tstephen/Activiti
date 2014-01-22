@@ -6,10 +6,10 @@ create table ACT_GE_PROPERTY (
 );
 
 insert into ACT_GE_PROPERTY
-values ('schema.version', '5.13-SNAPSHOT', 1);
+values ('schema.version', '5.15-SNAPSHOT', 1);
 
 insert into ACT_GE_PROPERTY
-values ('schema.history', 'create(5.13-SNAPSHOT)', 1);
+values ('schema.history', 'create(5.15-SNAPSHOT)', 1);
 
 insert into ACT_GE_PROPERTY
 values ('next.dbid', '1', 1);
@@ -28,6 +28,7 @@ create table ACT_RE_DEPLOYMENT (
     ID_ varchar(64) not null,
     NAME_ varchar(255),
     CATEGORY_ varchar(255),
+    TENANT_ID_ varchar(255),
     DEPLOY_TIME_ timestamp,
     primary key (ID_)
 );
@@ -45,6 +46,7 @@ create table ACT_RE_MODEL (
     DEPLOYMENT_ID_ varchar(64),
     EDITOR_SOURCE_VALUE_ID_ varchar(64),
     EDITOR_SOURCE_EXTRA_VALUE_ID_ varchar(64),
+    TENANT_ID_ varchar(255),
     primary key (ID_)
 );
 
@@ -61,10 +63,9 @@ create table ACT_RU_EXECUTION (
     IS_CONCURRENT_ smallint check(IS_CONCURRENT_ in (1,0)),
     IS_SCOPE_ smallint check(IS_SCOPE_ in (1,0)),
     IS_EVENT_SCOPE_ smallint check(IS_EVENT_SCOPE_ in (1,0)),
-	UNI_BUSINESS_KEY varchar (255)  not null  generated always as (case when "BUSINESS_KEY_" is null then "ID_" else "BUSINESS_KEY_" end),
-	UNI_PROC_DEF_ID varchar (64)  not null  generated always as (case when "PROC_DEF_ID_" is null then "ID_" else "PROC_DEF_ID_" end),
 	SUSPENSION_STATE_ integer,
 	CACHED_ENT_STATE_ integer,
+	TENANT_ID_ varchar(255),
     primary key (ID_)
 );
 
@@ -85,6 +86,7 @@ create table ACT_RU_JOB (
     REPEAT_ varchar(255),
     HANDLER_TYPE_ varchar(255),
     HANDLER_CFG_ varchar(4000),
+    TENANT_ID_ varchar(255),
     primary key (ID_)
 );
 
@@ -101,6 +103,7 @@ create table ACT_RE_PROCDEF (
     DESCRIPTION_ varchar(4000),
     HAS_START_FORM_KEY_ smallint check(HAS_START_FORM_KEY_ in (1,0)),
     SUSPENSION_STATE_ integer,
+    TENANT_ID_ varchar(255),
     primary key (ID_)
 );
 
@@ -120,7 +123,9 @@ create table ACT_RU_TASK (
     PRIORITY_ integer,
     CREATE_TIME_ timestamp,
     DUE_DATE_ timestamp,
+    CATEGORY_ varchar(255),
     SUSPENSION_STATE_ integer,
+    TENANT_ID_ varchar(255),
     primary key (ID_)
 );
 
@@ -165,7 +170,6 @@ create table ACT_RU_EVENT_SUBSCR (
     primary key (ID_)
 );
 
-create unique index ACT_UNIQ_RU_BUS_KEY on ACT_RU_EXECUTION(UNI_PROC_DEF_ID, UNI_BUSINESS_KEY);
 create index ACT_IDX_EXEC_BUSKEY on ACT_RU_EXECUTION(BUSINESS_KEY_);
 create index ACT_IDX_TASK_CREATE on ACT_RU_TASK(CREATE_TIME_);
 create index ACT_IDX_IDENT_LNK_USER on ACT_RU_IDENTITYLINK(USER_ID_);
@@ -173,6 +177,22 @@ create index ACT_IDX_IDENT_LNK_GROUP on ACT_RU_IDENTITYLINK(GROUP_ID_);
 create index ACT_IDX_EVENT_SUBSCR_CONFIG_ on ACT_RU_EVENT_SUBSCR(CONFIGURATION_);
 create index ACT_IDX_VARIABLE_TASK_ID on ACT_RU_VARIABLE(TASK_ID_);
 create index ACT_IDX_ATHRZ_PROCEDEF on ACT_RU_IDENTITYLINK(PROC_DEF_ID_);
+create index ACT_IDX_EXECUTION_PROC on ACT_RU_EXECUTION(PROC_DEF_ID_);
+create index ACT_IDX_EXECUTION_PARENT on ACT_RU_EXECUTION(PARENT_ID_);
+create index ACT_IDX_EXECUTION_SUPER on ACT_RU_EXECUTION(SUPER_EXEC_);
+create index ACT_IDX_EXECUTION_IDANDREV on ACT_RU_EXECUTION(ID_, REV_);
+create index ACT_IDX_VARIABLE_BA on ACT_RU_VARIABLE(BYTEARRAY_ID_);
+create index ACT_IDX_VARIABLE_EXEC on ACT_RU_VARIABLE(EXECUTION_ID_);
+create index ACT_IDX_VARIABLE_PROCINST on ACT_RU_VARIABLE(PROC_INST_ID_);
+create index ACT_IDX_IDENT_LNK_TASK on ACT_RU_IDENTITYLINK(TASK_ID_);
+create index ACT_IDX_IDENT_LNK_PROCINST on ACT_RU_IDENTITYLINK(PROC_INST_ID_);
+create index ACT_IDX_IDENT_LNK_PROCDEF on ACT_RU_IDENTITYLINK(PROC_DEF_ID_);
+create index ACT_IDX_TASK_EXEC on ACT_RU_TASK(EXECUTION_ID_);
+create index ACT_IDX_TASK_PROCINST on ACT_RU_TASK(PROC_INST_ID_);
+create index ACT_IDX_EXEC_PROC_INST_ID on ACT_RU_EXECUTION(PROC_INST_ID_);
+create index ACT_IDX_TASK_PROC_DEF_ID on ACT_RU_TASK(PROC_DEF_ID_);
+create index ACT_IDX_EVENT_SUBSCR_EXEC_ID on ACT_RU_EVENT_SUBSCR(EXECUTION_ID_);
+create index ACT_IDX_JOB_EXCEPTION_STACK_ID on ACT_RU_JOB(EXCEPTION_STACK_ID_);
 
 alter table ACT_GE_BYTEARRAY
     add constraint ACT_FK_BYTEARR_DEPL 

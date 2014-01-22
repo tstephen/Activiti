@@ -20,6 +20,7 @@ import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.ActivitiTaskAlreadyClaimedException;
 import org.activiti.engine.JobNotFoundException;
+import org.activiti.engine.delegate.event.ActivitiEventDispatcher;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.activiti.engine.impl.cfg.TransactionContext;
 import org.activiti.engine.impl.context.Context;
@@ -32,7 +33,7 @@ import org.activiti.engine.impl.persistence.entity.CommentEntityManager;
 import org.activiti.engine.impl.persistence.entity.DeploymentEntityManager;
 import org.activiti.engine.impl.persistence.entity.EventSubscriptionEntityManager;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntityManager;
-import org.activiti.engine.impl.persistence.entity.GroupEntityManager;
+import org.activiti.engine.impl.persistence.entity.GroupIdentityManager;
 import org.activiti.engine.impl.persistence.entity.HistoricActivityInstanceEntityManager;
 import org.activiti.engine.impl.persistence.entity.HistoricDetailEntityManager;
 import org.activiti.engine.impl.persistence.entity.HistoricIdentityLinkEntityManager;
@@ -42,17 +43,18 @@ import org.activiti.engine.impl.persistence.entity.HistoricVariableInstanceEntit
 import org.activiti.engine.impl.persistence.entity.IdentityInfoEntityManager;
 import org.activiti.engine.impl.persistence.entity.IdentityLinkEntityManager;
 import org.activiti.engine.impl.persistence.entity.JobEntityManager;
-import org.activiti.engine.impl.persistence.entity.MembershipEntityManager;
+import org.activiti.engine.impl.persistence.entity.MembershipIdentityManager;
 import org.activiti.engine.impl.persistence.entity.ModelEntityManager;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntityManager;
 import org.activiti.engine.impl.persistence.entity.PropertyEntityManager;
 import org.activiti.engine.impl.persistence.entity.ResourceEntityManager;
 import org.activiti.engine.impl.persistence.entity.TableDataManager;
 import org.activiti.engine.impl.persistence.entity.TaskEntityManager;
-import org.activiti.engine.impl.persistence.entity.UserEntityManager;
+import org.activiti.engine.impl.persistence.entity.UserIdentityManager;
 import org.activiti.engine.impl.persistence.entity.VariableInstanceEntityManager;
 import org.activiti.engine.impl.pvm.runtime.AtomicOperation;
 import org.activiti.engine.impl.pvm.runtime.InterpretableExecution;
+import org.activiti.engine.logging.LogMDC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -184,7 +186,11 @@ public class CommandContext {
     if (this.exception == null) {
       this.exception = exception;
     } else {
-      log.error("masked exception in command context. for root cause, see below as it will be rethrown later.", exception);
+      if (Context.isExecutionContextActive()) {
+        LogMDC.putMDCExecution(Context.getExecutionContext().getExecution());
+      }
+    	log.error("masked exception in command context. for root cause, see below as it will be rethrown later.", exception);    	
+    	LogMDC.clear();
     }
   }
 
@@ -271,20 +277,20 @@ public class CommandContext {
     return getSession(JobEntityManager.class);
   }
 
-  public UserEntityManager getUserEntityManager() {
-    return getSession(UserEntityManager.class);
+  public UserIdentityManager getUserIdentityManager() {
+    return getSession(UserIdentityManager.class);
   }
 
-  public GroupEntityManager getGroupEntityManager() {
-    return getSession(GroupEntityManager.class);
+  public GroupIdentityManager getGroupIdentityManager() {
+    return getSession(GroupIdentityManager.class);
   }
 
   public IdentityInfoEntityManager getIdentityInfoEntityManager() {
     return getSession(IdentityInfoEntityManager.class);
   }
 
-  public MembershipEntityManager getMembershipEntityManager() {
-    return getSession(MembershipEntityManager.class);
+  public MembershipIdentityManager getMembershipIdentityManager() {
+    return getSession(MembershipIdentityManager.class);
   }
   
   public AttachmentEntityManager getAttachmentEntityManager() {
@@ -314,7 +320,7 @@ public class CommandContext {
   public HistoryManager getHistoryManager() {
     return getSession(HistoryManager.class);
   }
-
+  
   // getters and setters //////////////////////////////////////////////////////
 
   public TransactionContext getTransactionContext() {
@@ -331,5 +337,11 @@ public class CommandContext {
   }
   public FailedJobCommandFactory getFailedJobCommandFactory() {
     return failedJobCommandFactory;
+  }
+  public ProcessEngineConfigurationImpl getProcessEngineConfiguration() {
+	  return processEngineConfiguration;
+  }
+  public ActivitiEventDispatcher getEventDispatcher() {
+  	return processEngineConfiguration.getEventDispatcher();
   }
 }

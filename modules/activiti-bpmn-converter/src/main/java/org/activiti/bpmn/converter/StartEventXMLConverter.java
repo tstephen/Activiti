@@ -22,7 +22,7 @@ import org.activiti.bpmn.converter.util.BpmnXMLUtil;
 import org.activiti.bpmn.model.BaseElement;
 import org.activiti.bpmn.model.StartEvent;
 import org.activiti.bpmn.model.alfresco.AlfrescoStartEvent;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Tijs Rademakers
@@ -81,7 +81,7 @@ public class StartEventXMLConverter extends BaseBpmnXMLConverter {
   @Override
   protected void writeAdditionalChildElements(BaseElement element, XMLStreamWriter xtw) throws Exception {
     StartEvent startEvent = (StartEvent) element;
-    writeEventDefinitions(startEvent.getEventDefinitions(), xtw);
+    writeEventDefinitions(startEvent, startEvent.getEventDefinitions(), xtw);
   }
   
   public void addFormType(String formType) {

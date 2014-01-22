@@ -30,6 +30,14 @@ import org.activiti.engine.task.Task;
 // "${empty requestScope['pailz.extensions'][task.id] ? '' : requestScope['pailz.extensions'][task.id].businessKey}",
 public class TaskBean implements Task {
 
+  public static List<TaskBean> toList(List<Task> tasks) {
+    List<TaskBean> taskBeans = new ArrayList<TaskBean>();
+    for (Task task : tasks) {
+      taskBeans.add(new TaskBean(task));
+    }
+    return taskBeans;
+  }
+  
   private Task task;
   private Map<String, Object> vars;
 
@@ -293,12 +301,29 @@ public class TaskBean implements Task {
   public boolean isSuspended() {
     return this.task.isSuspended();
   }
+  
+  @Override
+  public String getCategory() {
+    return task.getCategory();
+  }
 
-  public static List<TaskBean> toList(List<Task> tasks) {
-    List<TaskBean> taskBeans = new ArrayList<TaskBean>();
-    for (Task task : tasks) {
-      taskBeans.add(new TaskBean(task));
-    }
-    return taskBeans;
+  @Override
+  public void setCategory(String category) {
+    task.setCategory(category);
+  }
+
+  @Override
+  public String getTenantId() {
+    return task.getTenantId();
+  }
+
+  @Override
+  public Map<String, Object> getTaskLocalVariables() {
+    return task.getTaskLocalVariables();
+  }
+
+  @Override
+  public Map<String, Object> getProcessVariables() {
+    return task.getProcessVariables();
   }
 }

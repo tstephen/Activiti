@@ -25,7 +25,7 @@ import org.activiti.engine.impl.form.TaskFormHandler;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
 import org.activiti.engine.impl.task.TaskDefinition;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 
 /**
@@ -71,6 +71,9 @@ public class UserTaskParseHandler extends AbstractActivityBpmnParseHandler<UserT
     if (StringUtils.isNotEmpty(userTask.getAssignee())) {
       taskDefinition.setAssigneeExpression(expressionManager.createExpression(userTask.getAssignee()));
     }
+    if (StringUtils.isNotEmpty(userTask.getOwner())) {
+      taskDefinition.setOwnerExpression(expressionManager.createExpression(userTask.getOwner()));
+    }
     for (String candidateUser : userTask.getCandidateUsers()) {
       taskDefinition.addCandidateUserIdExpression(expressionManager.createExpression(candidateUser));
     }
@@ -88,6 +91,11 @@ public class UserTaskParseHandler extends AbstractActivityBpmnParseHandler<UserT
     // Due date
     if (StringUtils.isNotEmpty(userTask.getDueDate())) {
       taskDefinition.setDueDateExpression(expressionManager.createExpression(userTask.getDueDate()));
+    }
+    
+    // Category
+    if (StringUtils.isNotEmpty(userTask.getCategory())) {
+    	taskDefinition.setCategoryExpression(expressionManager.createExpression(userTask.getCategory()));
     }
     
     // Priority

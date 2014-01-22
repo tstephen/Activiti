@@ -14,11 +14,9 @@
 
 package org.activiti.engine.impl;
 
-<<<<<<< HEAD
-import javax.ws.rs.Path;
-=======
 import java.util.List;
->>>>>>> 60b620e53dfb173b6f7f089c1e18cda57adf9b61
+
+import javax.ws.rs.Path;
 
 import org.activiti.engine.HistoryService;
 import org.activiti.engine.history.HistoricActivityInstanceQuery;
@@ -28,8 +26,10 @@ import org.activiti.engine.history.HistoricProcessInstanceQuery;
 import org.activiti.engine.history.HistoricTaskInstanceQuery;
 import org.activiti.engine.history.HistoricVariableInstanceQuery;
 import org.activiti.engine.history.NativeHistoricActivityInstanceQuery;
+import org.activiti.engine.history.NativeHistoricDetailQuery;
 import org.activiti.engine.history.NativeHistoricProcessInstanceQuery;
 import org.activiti.engine.history.NativeHistoricTaskInstanceQuery;
+import org.activiti.engine.history.NativeHistoricVariableInstanceQuery;
 import org.activiti.engine.impl.cmd.DeleteHistoricProcessInstanceCmd;
 import org.activiti.engine.impl.cmd.DeleteHistoricTaskInstanceCmd;
 import org.activiti.engine.impl.cmd.GetHistoricIdentityLinksForTaskCmd;
@@ -59,10 +59,23 @@ public class HistoryServiceImpl extends ServiceImpl implements HistoryService {
     return new HistoricDetailQueryImpl(commandExecutor);
   }
 
+  @Override
+  public NativeHistoricDetailQuery createNativeHistoricDetailQuery() {
+    return new NativeHistoricDetailQueryImpl(commandExecutor);
+  }
+
   public HistoricVariableInstanceQuery createHistoricVariableInstanceQuery() {
     return new HistoricVariableInstanceQueryImpl(commandExecutor);
   }
-  
+
+<<<<<<< Updated upstream
+  @Override
+  public NativeHistoricVariableInstanceQuery createNativeHistoricVariableInstanceQuery() {
+    return new NativeHistoricVariableInstanceQueryImpl(commandExecutor);
+  }
+
+=======
+>>>>>>> Stashed changes
   public void deleteHistoricTaskInstance(String taskId) {
     commandExecutor.execute(new DeleteHistoricTaskInstanceCmd(taskId));
   }

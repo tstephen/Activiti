@@ -166,14 +166,22 @@ public class ProcessInstanceBean implements ProcessInstance {
 
   @Override
   public String getActivityId() {
-    // TODO Auto-generated method stub
-    return null;
+		return processInstance.getActivityId();
   }
 
   @Override
   public String getParentId() { 
-    // TODO Auto-generated method stub
-    return null;
+		return processInstance.getParentId();
+  }
+
+  @Override
+  public Map<String, Object> getProcessVariables() {
+    return processInstance.getProcessVariables();
+  }
+
+  @Override
+  public String getTenantId() {
+    return processInstance.getTenantId();
   }
 
 }

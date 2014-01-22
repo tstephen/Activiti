@@ -39,6 +39,7 @@ import org.activiti.engine.impl.cmd.ActivateProcessDefinitionCmd;
 import org.activiti.engine.impl.cmd.AddEditorSourceExtraForModelCmd;
 import org.activiti.engine.impl.cmd.AddEditorSourceForModelCmd;
 import org.activiti.engine.impl.cmd.AddIdentityLinkForProcessDefinitionCmd;
+import org.activiti.engine.impl.cmd.ChangeDeploymentTenantIdCmd;
 import org.activiti.engine.impl.cmd.CreateModelCmd;
 import org.activiti.engine.impl.cmd.DeleteDeploymentCmd;
 import org.activiti.engine.impl.cmd.DeleteIdentityLinkForProcessDefinitionCmd;
@@ -56,6 +57,7 @@ import org.activiti.engine.impl.cmd.GetModelCmd;
 import org.activiti.engine.impl.cmd.GetModelEditorSourceCmd;
 import org.activiti.engine.impl.cmd.GetModelEditorSourceExtraCmd;
 import org.activiti.engine.impl.cmd.SaveModelCmd;
+import org.activiti.engine.impl.cmd.SetDeploymentCategoryCmd;
 import org.activiti.engine.impl.cmd.SetProcessDefinitionCategoryCmd;
 import org.activiti.engine.impl.cmd.SuspendProcessDefinitionCmd;
 import org.activiti.engine.impl.persistence.entity.ModelEntity;
@@ -129,6 +131,10 @@ public class RepositoryServiceImpl extends ServiceImpl implements RepositoryServ
   public void deleteDeployment(String deploymentId, boolean cascade) {
     commandExecutor.execute(new DeleteDeploymentCmd(deploymentId, cascade));
   }
+  
+  public void setDeploymentCategory(String deploymentId, String category) {
+    commandExecutor.execute(new SetDeploymentCategoryCmd(deploymentId, category));
+  }
 
   public ProcessDefinitionQuery createProcessDefinitionQuery() {
     return new ProcessDefinitionQueryImpl(commandExecutor);
@@ -169,6 +175,11 @@ public class RepositoryServiceImpl extends ServiceImpl implements RepositoryServ
 
   public InputStream getResourceAsStream(String deploymentId, String resourceName) {
     return commandExecutor.execute(new GetDeploymentResourceCmd(deploymentId, resourceName));
+  }
+  
+  @Override
+  public void changeDeploymentTenantId(String deploymentId, String newTenantId) {
+  	commandExecutor.execute(new ChangeDeploymentTenantIdCmd(deploymentId, newTenantId));
   }
 
   public DeploymentQuery createDeploymentQuery() {

@@ -30,10 +30,15 @@ import javax.ws.rs.core.MediaType;
 
 import org.activiti.engine.ActivitiIllegalArgumentException;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.delegate.event.ActivitiEvent;
+import org.activiti.engine.delegate.event.ActivitiEventListener;
+import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.form.FormData;
 import org.activiti.engine.impl.cmd.ActivateProcessInstanceCmd;
+import org.activiti.engine.impl.cmd.AddEventListenerCommand;
 import org.activiti.engine.impl.cmd.AddIdentityLinkForProcessInstanceCmd;
 import org.activiti.engine.impl.cmd.DeleteProcessInstanceCmd;
+import org.activiti.engine.impl.cmd.DispatchEventCommand;
 import org.activiti.engine.impl.cmd.FindActiveActivityIdsCmd;
 import org.activiti.engine.impl.cmd.GetExecutionVariableCmd;
 import org.activiti.engine.impl.cmd.GetExecutionVariablesCmd;
@@ -41,8 +46,10 @@ import org.activiti.engine.impl.cmd.GetIdentityLinksForProcessInstanceCmd;
 import org.activiti.engine.impl.cmd.GetStartFormCmd;
 import org.activiti.engine.impl.cmd.HasExecutionVariableCmd;
 import org.activiti.engine.impl.cmd.MessageEventReceivedCmd;
+import org.activiti.engine.impl.cmd.RemoveEventListenerCommand;
 import org.activiti.engine.impl.cmd.RemoveExecutionVariablesCmd;
 import org.activiti.engine.impl.cmd.SetExecutionVariablesCmd;
+import org.activiti.engine.impl.cmd.SetProcessInstanceBusinessKeyCmd;
 import org.activiti.engine.impl.cmd.SignalCmd;
 import org.activiti.engine.impl.cmd.SignalEventReceivedCmd;
 import org.activiti.engine.impl.cmd.StartProcessInstanceByMessageCmd;
@@ -141,7 +148,11 @@ public class RuntimeServiceImpl extends ServiceImpl implements RuntimeService {
 
   public NativeProcessInstanceQuery createNativeProcessInstanceQuery() {
     return new NativeProcessInstanceQueryImpl(commandExecutor);
-  }  
+  } 
+  
+  public void updateBusinessKey(String processInstanceId, String businessKey) {
+    commandExecutor.execute(new SetProcessInstanceBusinessKeyCmd(processInstanceId, businessKey));
+  }
   
   public Map<String, Object> getVariables(String executionId) {
     return commandExecutor.execute(new GetExecutionVariablesCmd(executionId, null, false));
@@ -213,7 +224,6 @@ public class RuntimeServiceImpl extends ServiceImpl implements RuntimeService {
     Collection<String> variableNames = new ArrayList<String>();
     variableNames.add(variableName);
     commandExecutor.execute(new RemoveExecutionVariablesCmd(executionId, variableNames, true));
-    
   }
 
   public void removeVariables(String executionId, Collection<String> variableNames) {
@@ -280,6 +290,10 @@ public class RuntimeServiceImpl extends ServiceImpl implements RuntimeService {
     commandExecutor.execute(new SignalEventReceivedCmd(signalName, null, null));
   }
 
+  public void signalEventReceivedAsync(String signalName) {
+    commandExecutor.execute(new SignalEventReceivedCmd(signalName, null, true));
+  }
+  
   public void signalEventReceived(String signalName, Map<String, Object> processVariables) {
     commandExecutor.execute(new SignalEventReceivedCmd(signalName, null, processVariables));
   }
@@ -292,6 +306,10 @@ public class RuntimeServiceImpl extends ServiceImpl implements RuntimeService {
     commandExecutor.execute(new SignalEventReceivedCmd(signalName, executionId, processVariables));
   }
 
+  public void signalEventReceivedAsync(String signalName, String executionId) {
+    commandExecutor.execute(new SignalEventReceivedCmd(signalName, executionId, true));
+  }
+  
   public void messageEventReceived(String messageName, String executionId) {
     commandExecutor.execute(new MessageEventReceivedCmd(messageName, executionId, null));
   }
@@ -299,5 +317,28 @@ public class RuntimeServiceImpl extends ServiceImpl implements RuntimeService {
   public void messageEventReceived(String messageName, String executionId, Map<String, Object> processVariables) {
     commandExecutor.execute(new MessageEventReceivedCmd(messageName, executionId, processVariables));
   }
+  
+  public void messageEventReceivedAsync(String messageName, String executionId) {
+	  commandExecutor.execute(new MessageEventReceivedCmd(messageName, executionId, true));
+  }
 
+	@Override
+  public void addEventListener(ActivitiEventListener listenerToAdd) {
+		commandExecutor.execute(new AddEventListenerCommand(listenerToAdd));
+  }
+
+	@Override
+  public void addEventListener(ActivitiEventListener listenerToAdd, ActivitiEventType... types) {
+		commandExecutor.execute(new AddEventListenerCommand(listenerToAdd, types));
+  }
+
+	@Override
+  public void removeEventListener(ActivitiEventListener listenerToRemove) {
+		commandExecutor.execute(new RemoveEventListenerCommand(listenerToRemove));
+  }
+
+	@Override
+  public void dispatchEvent(ActivitiEvent event) {
+		commandExecutor.execute(new DispatchEventCommand(event));
+  }
 }
