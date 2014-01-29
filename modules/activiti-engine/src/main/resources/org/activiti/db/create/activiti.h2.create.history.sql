@@ -65,8 +65,8 @@ create table ACT_HI_VARINST (
     BYTEARRAY_ID_ varchar(64),
     DOUBLE_ double,
     LONG_ bigint,
-    TEXT_ varchar(4000),
-    TEXT2_ varchar(4000),
+    TEXT_ text,
+    TEXT2_ text,
     primary key (ID_)
 );
 
@@ -84,8 +84,8 @@ create table ACT_HI_DETAIL (
     BYTEARRAY_ID_ varchar(64),
     DOUBLE_ double,
     LONG_ bigint,
-    TEXT_ varchar(4000),
-    TEXT2_ varchar(4000),
+    TEXT_ text,
+    TEXT2_ text,
     primary key (ID_)
 );
 
