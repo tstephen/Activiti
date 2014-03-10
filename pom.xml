@@ -7,11 +7,13 @@
   <groupId>org.activiti</groupId>
   <artifactId>activiti-root</artifactId>
 
+  <!--
   <parent>
     <groupId>org.sonatype.oss</groupId>
     <artifactId>oss-parent</artifactId>
     <version>7</version>
   </parent>
+  -->
 
   <packaging>pom</packaging>
   <version>5.14.1</version>
