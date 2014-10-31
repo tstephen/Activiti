@@ -26,6 +26,8 @@ import javax.activation.DataHandler;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
+import org.activiti.engine.ActivitiException;
+import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.util.CollectionUtil;
 import org.activiti.engine.test.Deployment;
 import org.subethamail.wiser.WiserMessage;
@@ -33,6 +35,7 @@ import org.subethamail.wiser.WiserMessage;
 
 /**
  * @author Joram Barrez
+ * @author Tim Stephenson
  */
 public class EmailServiceTaskTest extends EmailTestCase {
   
@@ -48,7 +51,39 @@ public class EmailServiceTaskTest extends EmailTestCase {
             Arrays.asList("kermit@activiti.org"), null);
     assertProcessEnded(procId);
   }
-  
+
+//  @Deployment
+  public void testSimpleTextMailWhenMultiTenant() throws Exception {
+    String tenantId = "myTenant";
+
+    org.activiti.engine.repository.Deployment deployment = repositoryService.createDeployment().addClasspathResource("org/activiti/engine/test/bpmn/mail/EmailSendTaskTest.testSimpleTextMail.bpmn20.xml").tenantId(tenantId).deploy();
+    String procId = runtimeService.startProcessInstanceByKeyAndTenantId("simpleTextOnly", tenantId).getId();
+
+    List<WiserMessage> messages = wiser.getMessages();
+    assertEquals(1, messages.size());
+
+    WiserMessage message = messages.get(0);
+    assertEmailSend(message, false, "Hello Kermit!", "This a text only e-mail.", "activiti@myTenant.com",
+        Arrays.asList("kermit@activiti.org"), null);
+    assertProcessEnded(procId);
+
+    repositoryService.deleteDeployment(deployment.getId(), true);
+  }
+
+  public void testSimpleTextMailForNonExistentTenant() throws Exception {
+    String tenantId = "nonExistentTenant";
+
+    org.activiti.engine.repository.Deployment deployment = repositoryService.createDeployment().addClasspathResource("org/activiti/engine/test/bpmn/mail/EmailSendTaskTest.testSimpleTextMail.bpmn20.xml").tenantId(tenantId).deploy();
+    try {
+      runtimeService.startProcessInstanceByKeyAndTenantId("simpleTextOnly", tenantId).getId();
+      fail("No exception thrown for unknown tenant");
+    } catch (ActivitiException e) {
+      ; // expected
+    }
+
+    repositoryService.deleteDeployment(deployment.getId(), true);
+  }
+
   @Deployment
   public void testSimpleTextMailMultipleRecipients() {
     runtimeService.startProcessInstanceByKey("simpleTextOnlyMultipleRecipients");

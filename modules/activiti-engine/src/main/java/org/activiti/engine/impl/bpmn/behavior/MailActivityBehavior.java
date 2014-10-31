@@ -19,8 +19,10 @@ import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiIllegalArgumentException;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.delegate.Expression;
+import org.activiti.engine.impl.cfg.MailServerInfo;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.activiti.engine.impl.context.Context;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.pvm.delegate.ActivityExecution;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
@@ -48,6 +50,7 @@ public class MailActivityBehavior extends AbstractBpmnActivityBehavior {
   protected Expression charset;
 
   public void execute(ActivityExecution execution) {
+    System.err.println("mail behavior has tenant: "+execution.getTenantId());
     String toStr = getStringFromField(to, execution);
     String fromStr = getStringFromField(from, execution);
     String ccStr = getStringFromField(cc, execution);
@@ -62,11 +65,11 @@ public class MailActivityBehavior extends AbstractBpmnActivityBehavior {
     Email email = createEmail(textStr, htmlStr);
 
     addTo(email, toStr);
-    setFrom(email, fromStr);
+    setFrom(email, fromStr, execution.getTenantId());
     addCc(email, ccStr);
     addBcc(email, bccStr);
     setSubject(email, subjectStr);
-    setMailServerProperties(email);
+    setMailServerProperties(email, execution.getTenantId());
     setCharset(email, charSetStr);
 
     try {
@@ -76,8 +79,6 @@ public class MailActivityBehavior extends AbstractBpmnActivityBehavior {
     }
     leave(execution);
   }
-
-  
 
   protected Email createEmail(String text, String html) {
     if (html != null) {
@@ -128,16 +129,24 @@ public class MailActivityBehavior extends AbstractBpmnActivityBehavior {
   }
 
   protected void setFrom(Email email, String from) {
-    String fromAddres = null;
+    setFrom(email, from, null);
+  }
+
+  protected void setFrom(Email email, String from, String tenantId) {
+    String fromAddress = null;
 
     if (from != null) {
-      fromAddres = from;
+      fromAddress = from;
     } else { // use default configured from address in process engine config
-      fromAddres = Context.getProcessEngineConfiguration().getMailServerDefaultFrom();
+      try {
+        fromAddress = Context.getProcessEngineConfiguration().getMailServer(tenantId).getMailServerDefaultFrom();
+      } catch (NullPointerException e) {
+        throw new ActivitiException("No SMTP host set up for tenant: " + tenantId, e);
+      }
     }
 
     try {
-      email.setFrom(fromAddres);
+      email.setFrom(fromAddress);
     } catch (EmailException e) {
       throw new ActivitiException("Could not set " + from + " as from address in email", e);
     }
@@ -174,9 +183,13 @@ public class MailActivityBehavior extends AbstractBpmnActivityBehavior {
   }
 
   protected void setMailServerProperties(Email email) {
+    setMailServerProperties(email, null);
+  }
+
+  protected void setMailServerProperties(Email email, String tenantId) {
     ProcessEngineConfigurationImpl processEngineConfiguration = Context.getProcessEngineConfiguration();
 
-    String mailSessionJndi = processEngineConfiguration.getMailSesionJndi();
+    String mailSessionJndi = processEngineConfiguration.getMailSessionJndi(tenantId);
     if (mailSessionJndi != null) {
       try {
         email.setMailSessionFromJNDI(mailSessionJndi);
@@ -184,20 +197,17 @@ public class MailActivityBehavior extends AbstractBpmnActivityBehavior {
         throw new ActivitiException("Could not send email: Incorrect JNDI configuration", e);
       }
     } else {
-      String host = processEngineConfiguration.getMailServerHost();
-      if (host == null) {
-        throw new ActivitiException("Could not send email: no SMTP host is configured");
+      MailServerInfo mailServer = processEngineConfiguration.getMailServer(tenantId);
+      if (mailServer == null) {
+        throw new ActivitiException("Could not send email: no SMTP host is configured for tenant: "+tenantId);
       }
-      email.setHostName(host);
+      email.setHostName(mailServer.getMailServerHost());
+      email.setSmtpPort(mailServer.getMailServerPort());
+      email.setSSL(mailServer.getMailServerUseSSL());
+      email.setTLS(mailServer.getMailServerUseTLS());
 
-      int port = processEngineConfiguration.getMailServerPort();
-      email.setSmtpPort(port);
-
-      email.setSSL(processEngineConfiguration.getMailServerUseSSL());
-      email.setTLS(processEngineConfiguration.getMailServerUseTLS());
-
-      String user = processEngineConfiguration.getMailServerUsername();
-      String password = processEngineConfiguration.getMailServerPassword();
+      String user = mailServer.getMailServerUsername();
+      String password = mailServer.getMailServerPassword();
       if (user != null && password != null) {
         email.setAuthentication(user, password);
       }
