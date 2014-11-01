@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.activiti.engine.ActivitiIllegalArgumentException;
 import org.activiti.engine.TaskService;
+import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.activiti.engine.impl.cmd.AddCommentCmd;
 import org.activiti.engine.impl.cmd.AddIdentityLinkCmd;
 import org.activiti.engine.impl.cmd.ClaimTaskCmd;
@@ -48,6 +49,7 @@ import org.activiti.engine.impl.cmd.GetTaskVariableCmd;
 import org.activiti.engine.impl.cmd.GetTaskVariablesCmd;
 import org.activiti.engine.impl.cmd.GetTypeCommentsCmd;
 import org.activiti.engine.impl.cmd.HasTaskVariableCmd;
+import org.activiti.engine.impl.cmd.NewTaskCmd;
 import org.activiti.engine.impl.cmd.RemoveTaskVariablesCmd;
 import org.activiti.engine.impl.cmd.ResolveTaskCmd;
 import org.activiti.engine.impl.cmd.SaveAttachmentCmd;
@@ -55,7 +57,6 @@ import org.activiti.engine.impl.cmd.SaveTaskCmd;
 import org.activiti.engine.impl.cmd.SetTaskDueDateCmd;
 import org.activiti.engine.impl.cmd.SetTaskPriorityCmd;
 import org.activiti.engine.impl.cmd.SetTaskVariablesCmd;
-import org.activiti.engine.impl.persistence.entity.TaskEntity;
 import org.activiti.engine.task.Attachment;
 import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.Event;
@@ -71,15 +72,21 @@ import org.activiti.engine.task.TaskQuery;
  * @author Joram Barrez
  */
 public class TaskServiceImpl extends ServiceImpl implements TaskService {
+	
+	public TaskServiceImpl() {
+		
+	}
+	
+	public TaskServiceImpl(ProcessEngineConfigurationImpl processEngineConfiguration) {
+		super(processEngineConfiguration);
+	}
 
   public Task newTask() {
     return newTask(null);
   }
   
   public Task newTask(String taskId) {
-    TaskEntity task = TaskEntity.create();
-    task.setId(taskId);
-    return task;
+    return commandExecutor.execute(new NewTaskCmd(taskId));
   }
   
   public void saveTask(Task task) {
@@ -197,7 +204,7 @@ public class TaskServiceImpl extends ServiceImpl implements TaskService {
   }
   
   public TaskQuery createTaskQuery() {
-    return new TaskQueryImpl(commandExecutor);
+    return new TaskQueryImpl(commandExecutor, processEngineConfiguration.getDatabaseType());
   }
  
   public NativeTaskQuery createNativeTaskQuery() {
@@ -223,7 +230,12 @@ public class TaskServiceImpl extends ServiceImpl implements TaskService {
   public Object getVariable(String executionId, String variableName) {
     return commandExecutor.execute(new GetTaskVariableCmd(executionId, variableName, false));
   }
-  
+
+    @Override
+    public <T> T getVariable(String taskId, String variableName, Class<T> variableClass) {
+        return variableClass.cast(getVariable(taskId, variableName));
+    }
+
   public boolean hasVariable(String taskId, String variableName) {
     return commandExecutor.execute(new HasTaskVariableCmd(taskId, variableName, false));
   }
@@ -231,7 +243,12 @@ public class TaskServiceImpl extends ServiceImpl implements TaskService {
   public Object getVariableLocal(String executionId, String variableName) {
     return commandExecutor.execute(new GetTaskVariableCmd(executionId, variableName, true));
   }
-  
+
+    @Override
+    public <T> T getVariableLocal(String taskId, String variableName, Class<T> variableClass) {
+        return variableClass.cast(getVariableLocal(taskId, variableName));
+    }
+
   public boolean hasVariableLocal(String taskId, String variableName) {
     return commandExecutor.execute(new HasTaskVariableCmd(taskId, variableName, true));
   }
@@ -318,6 +335,10 @@ public class TaskServiceImpl extends ServiceImpl implements TaskService {
 
   public List<Comment> getProcessInstanceComments(String processInstanceId) {
     return commandExecutor.execute(new GetProcessInstanceCommentsCmd(processInstanceId));
+  }
+
+  public List<Comment> getProcessInstanceComments(String processInstanceId, String type) {
+    return commandExecutor.execute(new GetProcessInstanceCommentsCmd(processInstanceId, type));
   }
 
   public Attachment createAttachment(String attachmentType, String taskId, String processInstanceId, String attachmentName, String attachmentDescription, InputStream content) {

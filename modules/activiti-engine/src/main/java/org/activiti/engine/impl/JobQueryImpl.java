@@ -18,9 +18,9 @@ import java.util.Date;
 import java.util.List;
 
 import org.activiti.engine.ActivitiIllegalArgumentException;
+import org.activiti.engine.impl.context.Context;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.interceptor.CommandExecutor;
-import org.activiti.engine.impl.util.ClockUtil;
 import org.activiti.engine.runtime.Job;
 import org.activiti.engine.runtime.JobQuery;
 
@@ -50,6 +50,8 @@ public class JobQueryImpl extends AbstractQuery<JobQuery, Job> implements JobQue
   protected String tenantId;
   protected String tenantIdLike;
   protected boolean withoutTenantId;
+  protected boolean noRetriesLeft;
+  
   
   public JobQueryImpl() {
   }
@@ -159,7 +161,12 @@ public class JobQueryImpl extends AbstractQuery<JobQuery, Job> implements JobQue
     this.duedateLowerThanOrEqual = date;
     return this;
   }
-  
+
+  public JobQuery noRetriesLeft() {
+	 noRetriesLeft = true;
+	 return this;
+  }
+
   public JobQuery withException() {
     this.withException = true;
     return this;
@@ -251,7 +258,7 @@ public class JobQueryImpl extends AbstractQuery<JobQuery, Job> implements JobQue
     return executable;
   }
   public Date getNow() {
-    return ClockUtil.getCurrentTime();
+    return Context.getProcessEngineConfiguration().getClock().getCurrentTime();
   }
   public boolean isWithException() {
     return withException;

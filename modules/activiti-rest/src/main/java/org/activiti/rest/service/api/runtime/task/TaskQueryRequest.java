@@ -16,15 +16,17 @@ package org.activiti.rest.service.api.runtime.task;
 import java.util.Date;
 import java.util.List;
 
+import org.activiti.rest.common.api.PaginateRequest;
 import org.activiti.rest.service.api.engine.variable.QueryVariable;
-import org.codehaus.jackson.annotate.JsonTypeInfo;
-import org.codehaus.jackson.annotate.JsonTypeInfo.Id;
+
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 
 /**
  * @author Frederik Heremans
  */
-public class TaskQueryRequest {
+public class TaskQueryRequest extends PaginateRequest {
 
   private String name;
   private String nameLike;
@@ -41,6 +43,7 @@ public class TaskQueryRequest {
   private String delegationState;
   private String candidateUser;
   private String candidateGroup;
+  private List<String> candidateGroupIn;
   private String involvedUser;
   private String processInstanceId;
   private String processInstanceBusinessKey;
@@ -66,7 +69,8 @@ public class TaskQueryRequest {
   private String tenantId;
   private String tenantIdLike;
   private Boolean withoutTenantId;
-  
+  private String candidateOrAssigned;
+
   private List<QueryVariable> taskVariables;
   private List<QueryVariable> processInstanceVariables;
   
@@ -189,6 +193,14 @@ public class TaskQueryRequest {
     this.candidateGroup = candidateGroup;
   }
   
+  public List<String> getCandidateGroupIn() {
+	return candidateGroupIn;
+  }
+	  
+  public void setCandidateGroupIn(List<String> candidateGroupIn) {
+	this.candidateGroupIn = candidateGroupIn;
+  }
+
   public String getInvolvedUser() {
     return involvedUser;
   }
@@ -404,5 +416,13 @@ public class TaskQueryRequest {
   
   public Boolean getWithoutTenantId() {
 	  return withoutTenantId;
+  }
+
+  public String getCandidateOrAssigned() {
+    return candidateOrAssigned;
+  }
+
+  public void setCandidateOrAssigned(String candidateOrAssigned) {
+    this.candidateOrAssigned = candidateOrAssigned;
   }
 }

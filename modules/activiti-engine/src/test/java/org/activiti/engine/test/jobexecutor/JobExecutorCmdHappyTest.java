@@ -25,7 +25,7 @@ import org.activiti.engine.impl.jobexecutor.AcquiredJobs;
 import org.activiti.engine.impl.jobexecutor.JobExecutor;
 import org.activiti.engine.impl.persistence.entity.MessageEntity;
 import org.activiti.engine.impl.persistence.entity.TimerEntity;
-import org.activiti.engine.impl.util.ClockUtil;
+import org.activiti.engine.runtime.Job;
 
 /**
  * @author Tom Baeyens
@@ -34,7 +34,7 @@ public class JobExecutorCmdHappyTest extends JobExecutorTestCase {
 
   public void testJobCommandsWithMessage() {
     CommandExecutor commandExecutor = processEngineConfiguration.getCommandExecutor();
-    JobExecutor jobExecutor = processEngineConfiguration.getJobExecutor();
+    
     String jobId = commandExecutor.execute(new Command<String>() {
 
       public String execute(CommandContext commandContext) {
@@ -44,19 +44,13 @@ public class JobExecutorCmdHappyTest extends JobExecutorTestCase {
       }
     });
 
-    AcquiredJobs acquiredJobs = commandExecutor.execute(new AcquireJobsCmd(jobExecutor));
-    List<List<String>> jobIdsList = acquiredJobs.getJobIdBatches();
-    assertEquals(1, jobIdsList.size());
-
-    List<String> jobIds = jobIdsList.get(0);
-
-    List<String> expectedJobIds = new ArrayList<String>();
-    expectedJobIds.add(jobId);
-
-    assertEquals(expectedJobIds, new ArrayList<String>(jobIds));
+    Job job  = managementService.createJobQuery().singleResult();
+    assertNotNull(job);
+    assertEquals(jobId, job.getId());
+    
     assertEquals(0, tweetHandler.getMessages().size());
 
-    commandExecutor.execute(new ExecuteJobsCmd(jobId));
+    managementService.executeJob(job.getId());
 
     assertEquals("i'm coding a test", tweetHandler.getMessages().get(0));
     assertEquals(1, tweetHandler.getMessages().size());
@@ -67,7 +61,7 @@ public class JobExecutorCmdHappyTest extends JobExecutorTestCase {
 
   public void testJobCommandsWithTimer() {
     // clock gets automatically reset in LogTestCase.runTest
-    ClockUtil.setCurrentTime(new Date(SOME_TIME));
+    processEngineConfiguration.getClock().setCurrentTime(new Date(SOME_TIME));
 
     CommandExecutor commandExecutor = processEngineConfiguration.getCommandExecutor();
     JobExecutor jobExecutor = processEngineConfiguration.getJobExecutor();
@@ -87,7 +81,7 @@ public class JobExecutorCmdHappyTest extends JobExecutorTestCase {
 
     List<String> expectedJobIds = new ArrayList<String>();
 
-    ClockUtil.setCurrentTime(new Date(SOME_TIME + (20 * SECOND)));
+    processEngineConfiguration.getClock().setCurrentTime(new Date(SOME_TIME + (20 * SECOND)));
 
     acquiredJobs = commandExecutor.execute(new AcquireJobsCmd(jobExecutor));
     jobIdsList = acquiredJobs.getJobIdBatches();

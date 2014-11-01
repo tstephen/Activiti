@@ -19,9 +19,9 @@ import java.util.List;
 
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.impl.test.PluggableActivitiTestCase;
-import org.activiti.engine.impl.util.ClockUtil;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.Execution;
+import org.activiti.engine.runtime.Job;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.IdentityLinkType;
 import org.activiti.engine.task.Task;
@@ -571,7 +571,7 @@ public class ProcessInstanceSuspensionTest extends PluggableActivitiTestCase {
   public void testJobNotExecutedAfterProcessInstanceSuspend() {
     
     Date now = new Date();
-    ClockUtil.setCurrentTime(now);
+    processEngineConfiguration.getClock().setCurrentTime(now);
     
     // Suspending the process instance should also stop the execution of jobs for that process instance
     ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().singleResult();
@@ -581,8 +581,10 @@ public class ProcessInstanceSuspensionTest extends PluggableActivitiTestCase {
     assertEquals(1, managementService.createJobQuery().count());
     
     // The jobs should not be executed now
-    ClockUtil.setCurrentTime(new Date(now.getTime() + (60 * 60 * 1000))); // Timer is set to fire on 5 minutes
-    waitForJobExecutorToProcessAllJobs(1000L, 100L);
+    processEngineConfiguration.getClock().setCurrentTime(new Date(now.getTime() + (60 * 60 * 1000))); // Timer is set to fire on 5 minutes
+    Job job = managementService.createJobQuery().executable().singleResult();
+    assertNull(job);
+    
     assertEquals(1, managementService.createJobQuery().count());
     
     // Activation of the process instance should now allow for job execution

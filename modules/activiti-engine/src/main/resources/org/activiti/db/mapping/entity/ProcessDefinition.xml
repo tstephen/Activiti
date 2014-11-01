@@ -7,7 +7,7 @@
   <!-- PROCESSDEFINITION INSERT -->
 
   <insert id="insertProcessDefinition" parameterType="org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity">
-    insert into ${prefix}ACT_RE_PROCDEF(ID_, REV_, CATEGORY_, NAME_, KEY_, VERSION_, DEPLOYMENT_ID_, RESOURCE_NAME_, DGRM_RESOURCE_NAME_, DESCRIPTION_, HAS_START_FORM_KEY_, SUSPENSION_STATE_, TENANT_ID_)
+    insert into ${prefix}ACT_RE_PROCDEF(ID_, REV_, CATEGORY_, NAME_, KEY_, VERSION_, DEPLOYMENT_ID_, RESOURCE_NAME_, DGRM_RESOURCE_NAME_, DESCRIPTION_, HAS_START_FORM_KEY_, HAS_GRAPHICAL_NOTATION_ , SUSPENSION_STATE_, TENANT_ID_)
     values (#{id, jdbcType=VARCHAR},
     		1,
             #{category, jdbcType=VARCHAR},
@@ -19,6 +19,7 @@
             #{diagramResourceName, jdbcType=VARCHAR},
             #{description, jdbcType=VARCHAR},
             #{hasStartFormKey, jdbcType=BOOLEAN},
+            #{isGraphicalNotationDefined, jdbcType=BOOLEAN},
             #{suspensionState, jdbcType=INTEGER},
             #{tenantId, jdbcType=VARCHAR})
   </insert>
@@ -62,6 +63,7 @@
     <result property="diagramResourceName" column="DGRM_RESOURCE_NAME_" jdbcType="VARCHAR"/>
     <result property="description" column="DESCRIPTION_" jdbcType="VARCHAR" />
     <result property="hasStartFormKey" column="HAS_START_FORM_KEY_" jdbcType="BOOLEAN"/>
+    <result property="isGraphicalNotationDefined" column="HAS_GRAPHICAL_NOTATION_" jdbcType="BOOLEAN" />
     <result property="suspensionState" column="SUSPENSION_STATE_" jdbcType="INTEGER"/>
   </resultMap>
 
@@ -133,13 +135,13 @@
       <if test="latest">
         and RES.VERSION_ = (select max(VERSION_) from ${prefix}ACT_RE_PROCDEF where KEY_ = RES.KEY_ 
              <if test="tenantId != null">
-	           and RES.TENANT_ID_ = #{tenantId}
+	           and TENANT_ID_ = #{tenantId}
 	         </if>
 	         <if test="tenantIdLike != null">
-	           and RES.TENANT_ID_ like #{tenantIdLike}
+	           and TENANT_ID_ like #{tenantIdLike}
 	         </if>
 	         <if test="withoutTenantId">
-	           and TENANT_ID_ is null
+	           and (TENANT_ID_ = '' or TENANT_ID_ is null)
 	         </if>
         )
       </if>
@@ -153,7 +155,7 @@
         and RES.TENANT_ID_ like #{tenantIdLike}
       </if>
       <if test="withoutTenantId">
-        and RES.TENANT_ID_ is null
+        and (RES.TENANT_ID_ = '' or RES.TENANT_ID_ is null)
       </if>
       <if test="eventSubscriptionType != null">
       	and (EVT.EVENT_TYPE_ = #{eventSubscriptionType} and EVT.EVENT_NAME_ = #{eventSubscriptionName}) 
@@ -178,7 +180,7 @@
     from ${prefix}ACT_RE_PROCDEF 
     where DEPLOYMENT_ID_ = #{deploymentId}
       and KEY_ = #{processDefinitionKey}
-      and TENANT_ID_ is null
+      and (TENANT_ID_ = '' or TENANT_ID_ is null)
   </select>
   
    <select id="selectProcessDefinitionByDeploymentAndKeyAndTenantId" parameterType="map" resultMap="processDefinitionResultMap">
@@ -193,8 +195,8 @@
     select *
     from ${prefix}ACT_RE_PROCDEF 
     where KEY_ = #{key} and
-          TENANT_ID_ is null and
-          VERSION_ = (select max(VERSION_) from ${prefix}ACT_RE_PROCDEF where KEY_ = #{processDefinitionKey} and TENANT_ID_ is null)
+          (TENANT_ID_ = ''  or TENANT_ID_ is null) and
+          VERSION_ = (select max(VERSION_) from ${prefix}ACT_RE_PROCDEF where KEY_ = #{processDefinitionKey} and (TENANT_ID_ = '' or TENANT_ID_ is null))
   </select>
   
   <select id="selectLatestProcessDefinitionByKeyAndTenantId" parameterType="map" resultMap="processDefinitionResultMap">

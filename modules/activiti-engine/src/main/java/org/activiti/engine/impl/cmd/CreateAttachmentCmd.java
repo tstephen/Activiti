@@ -19,7 +19,6 @@ import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.delegate.event.impl.ActivitiEventBuilder;
-import org.activiti.engine.impl.context.Context;
 import org.activiti.engine.impl.db.DbSqlSession;
 import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.impl.interceptor.Command;
@@ -96,6 +95,8 @@ public class CreateAttachmentCmd implements Command<Attachment> {
     	
     	commandContext.getProcessEngineConfiguration().getEventDispatcher().dispatchEvent(
     			ActivitiEventBuilder.createEntityEvent(ActivitiEventType.ENTITY_CREATED, attachment, processInstanceId, processInstanceId, processDefinitionId));
+    	commandContext.getProcessEngineConfiguration().getEventDispatcher().dispatchEvent(
+    			ActivitiEventBuilder.createEntityEvent(ActivitiEventType.ENTITY_INITIALIZED, attachment, processInstanceId, processInstanceId, processDefinitionId));
     }
     
     return attachment;
@@ -103,7 +104,7 @@ public class CreateAttachmentCmd implements Command<Attachment> {
 
   private void verifyParameters(CommandContext commandContext) {
     if (taskId != null) {
-      TaskEntity task = Context.getCommandContext().getTaskEntityManager().findTaskById(taskId);
+      TaskEntity task = commandContext.getTaskEntityManager().findTaskById(taskId);
 
       if (task == null) {
         throw new ActivitiObjectNotFoundException("Cannot find task with id " + taskId, Task.class);

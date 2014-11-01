@@ -15,15 +15,17 @@ package org.activiti.rest.service.api.runtime.process;
 
 import java.util.List;
 
+import org.activiti.rest.common.api.PaginateRequest;
 import org.activiti.rest.service.api.engine.variable.QueryVariable;
-import org.codehaus.jackson.annotate.JsonTypeInfo;
-import org.codehaus.jackson.annotate.JsonTypeInfo.Id;
+
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 
 /**
  * @author Frederik Heremans
  */
-public class ExecutionQueryRequest {
+public class ExecutionQueryRequest extends PaginateRequest {
   private String id;
   private String activityId;
   private String parentId;
