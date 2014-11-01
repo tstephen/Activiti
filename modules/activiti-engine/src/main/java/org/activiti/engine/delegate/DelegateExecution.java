@@ -51,7 +51,12 @@ public interface DelegateExecution extends VariableScope {
    * The process definition key for the process instance this execution is associated with.
    */
   String getProcessDefinitionId();
-  
+
+  /**
+   * The tenant id for the process instance this execution is associated with, or null.
+   */
+  String getTenantId();
+
   /**
    * Gets the id of the parent of this execution. If null, the execution represents a process-instance.
    */
