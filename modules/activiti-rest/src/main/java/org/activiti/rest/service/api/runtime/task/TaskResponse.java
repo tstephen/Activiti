@@ -19,7 +19,10 @@ import java.util.List;
 
 import org.activiti.engine.task.DelegationState;
 import org.activiti.engine.task.Task;
+import org.activiti.rest.common.util.DateToStringSerializer;
 import org.activiti.rest.service.api.engine.variable.RestVariable;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * @author Frederik Heremans
@@ -33,12 +36,16 @@ public class TaskResponse {
   protected String delegationState;
   protected String name;
   protected String description;
+  @JsonSerialize(using = DateToStringSerializer.class, as=Date.class)
   protected Date createTime;
+  @JsonSerialize(using = DateToStringSerializer.class, as=Date.class)
   protected Date dueDate;
   protected int priority;
   protected boolean suspended;
   protected String taskDefinitionKey;
   protected String tenantId;
+  protected String category;
+  protected String formKey;
   
   // References to other resources
   protected String parentTaskId;
@@ -66,9 +73,11 @@ public class TaskResponse {
     setTaskDefinitionKey(task.getTaskDefinitionKey());
     setParentTaskId(task.getParentTaskId());
     setExecutionId(task.getExecutionId());
+    setCategory(task.getCategory());
     setProcessInstanceId(task.getProcessInstanceId());
     setProcessDefinitionId(task.getProcessDefinitionId());
     setTenantId(task.getTenantId());
+    setFormKey(task.getFormKey());
   }
   
   protected String getDelegationStateString(DelegationState state) {
@@ -179,6 +188,14 @@ public class TaskResponse {
   public String getExecutionUrl() {
     return executionUrl;
   }
+  
+  public void setCategory(String category) {
+	  this.category = category;
+  }
+  
+  public String getCategory() {
+	  return category;
+  }
 
   public void setExecutionUrl(String executionUrl) {
     this.executionUrl = executionUrl;
@@ -234,5 +251,13 @@ public class TaskResponse {
   
   public void setTenantId(String tenantId) {
 	  this.tenantId = tenantId;
+  }
+
+  public String getFormKey() {
+    return formKey;
+  }
+
+  public void setFormKey(String formKey) {
+    this.formKey = formKey;
   }
 }

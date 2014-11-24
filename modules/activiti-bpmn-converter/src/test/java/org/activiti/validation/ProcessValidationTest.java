@@ -13,12 +13,8 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.validation.ProcessValidator;
-import org.activiti.validation.ProcessValidatorFactory;
-import org.activiti.validation.ValidationError;
 import org.activiti.validation.validator.Problems;
 import org.activiti.validation.validator.ValidatorSetNames;
-import org.activiti.validation.validator.ValidatorSetFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,12 +47,12 @@ public class ProcessValidationTest {
 	@Test
 	public void verifyValidation() {
 		List<ValidationError> allErrors = processValidator.validate(bpmnModel);
-		Assert.assertEquals(64, allErrors.size());
+        Assert.assertEquals(67, allErrors.size());
 		
 		String setName = ValidatorSetNames.ACTIVITI_EXECUTABLE_PROCESS; // shortening it a bit
 		
 		// isExecutable should be true
-		List<ValidationError> problems = findErrors(allErrors, setName, Problems.PROCESS_DEFINITION_IS_NOT_EXECUTABLE, 1);
+		List<ValidationError> problems = findErrors(allErrors, setName, Problems.PROCESS_DEFINITION_NOT_EXECUTABLE, 1);
 		assertProcessElementError(problems.get(0));
 		
 		// Event listeners
@@ -99,7 +95,7 @@ public class ProcessValidationTest {
 		// Sequence flow
 		problems = findErrors(allErrors, setName, Problems.SEQ_FLOW_INVALID_SRC, 1);
 		assertCommonProblemFieldForActivity(problems.get(0));
-		problems = findErrors(allErrors, setName, Problems.SEQ_FLOW_INVALID_TARGET, 1);
+		problems = findErrors(allErrors, setName, Problems.SEQ_FLOW_INVALID_TARGET, 2);
 		assertCommonProblemFieldForActivity(problems.get(0));
 		
 		// User task

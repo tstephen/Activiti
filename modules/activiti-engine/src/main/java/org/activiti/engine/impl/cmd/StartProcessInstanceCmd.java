@@ -19,12 +19,13 @@ import java.util.Map;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiIllegalArgumentException;
 import org.activiti.engine.ActivitiObjectNotFoundException;
-import org.activiti.engine.impl.context.Context;
+import org.activiti.engine.ProcessEngineConfiguration;
 import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.deploy.DeploymentManager;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
+import org.activiti.engine.impl.runtime.ProcessInstanceBuilderImpl;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 
@@ -41,6 +42,7 @@ public class StartProcessInstanceCmd<T> implements Command<ProcessInstance>, Ser
   protected Map<String, Object> variables;
   protected String businessKey;
   protected String tenantId;
+  protected String processInstanceName;
   
   public StartProcessInstanceCmd(String processDefinitionKey, String processDefinitionId, String businessKey, Map<String, Object> variables) {
     this.processDefinitionKey = processDefinitionKey;
@@ -55,8 +57,14 @@ public class StartProcessInstanceCmd<T> implements Command<ProcessInstance>, Ser
   	this.tenantId = tenantId;
   }
   
+  public StartProcessInstanceCmd(ProcessInstanceBuilderImpl processInstanceBuilder) {
+    this(processInstanceBuilder.getProcessDefinitionKey(), processInstanceBuilder.getProcessDefinitionId(),
+        processInstanceBuilder.getBusinessKey(), processInstanceBuilder.getVariables(), processInstanceBuilder.getTenantId());
+    this.processInstanceName = processInstanceBuilder.getProcessInstanceName();
+  }
+  
   public ProcessInstance execute(CommandContext commandContext) {
-    DeploymentManager deploymentCache = Context
+    DeploymentManager deploymentCache = commandContext
       .getProcessEngineConfiguration()
       .getDeploymentManager();
     
@@ -67,12 +75,12 @@ public class StartProcessInstanceCmd<T> implements Command<ProcessInstance>, Ser
       if (processDefinition == null) {
         throw new ActivitiObjectNotFoundException("No process definition found for id = '" + processDefinitionId + "'", ProcessDefinition.class);
       }
-    } else if(processDefinitionKey != null && tenantId == null){
+    } else if (processDefinitionKey != null && (tenantId == null || ProcessEngineConfiguration.NO_TENANT_ID.equals(tenantId))){
       processDefinition = deploymentCache.findDeployedLatestProcessDefinitionByKey(processDefinitionKey);
       if (processDefinition == null) {
         throw new ActivitiObjectNotFoundException("No process definition found for key '" + processDefinitionKey +"'", ProcessDefinition.class);
       }
-    } else if (processDefinitionKey != null && tenantId != null) {
+    } else if (processDefinitionKey != null && tenantId != null && !ProcessEngineConfiguration.NO_TENANT_ID.equals(tenantId)) {
     	 processDefinition = deploymentCache.findDeployedLatestProcessDefinitionByKeyAndTenantId(processDefinitionKey, tenantId);
        if (processDefinition == null) {
          throw new ActivitiObjectNotFoundException("No process definition found for key '" + processDefinitionKey +"' for tenant identifier " + tenantId, ProcessDefinition.class);
@@ -89,9 +97,17 @@ public class StartProcessInstanceCmd<T> implements Command<ProcessInstance>, Ser
 
     // Start the process instance
     ExecutionEntity processInstance = processDefinition.createProcessInstance(businessKey);
-    if (variables!=null) {
+
+    // now set the variables passed into the start command
+    if (variables != null) {
       processInstance.setVariables(variables);
     }
+    
+    // now set processInstance name
+    if (processInstanceName != null) {
+      processInstance.setName(processInstanceName);
+    }
+    
     processInstance.start();
     
     return processInstance;

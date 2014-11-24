@@ -6,10 +6,10 @@ create table ACT_GE_PROPERTY (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_bin;
 
 insert into ACT_GE_PROPERTY
-values ('schema.version', '5.15-SNAPSHOT', 1);
+values ('schema.version', '5.17.0.1', 1);
 
 insert into ACT_GE_PROPERTY
-values ('schema.history', 'create(5.15-SNAPSHOT)', 1);
+values ('schema.history', 'create(5.17.0.1)', 1);
 
 insert into ACT_GE_PROPERTY
 values ('next.dbid', '1', 1);
@@ -28,6 +28,7 @@ create table ACT_RE_DEPLOYMENT (
     ID_ varchar(64),
     NAME_ varchar(255),
     CATEGORY_ varchar(255),
+    TENANT_ID_ varchar(255) default '',
     DEPLOY_TIME_ timestamp,
     primary key (ID_)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_bin;
@@ -45,7 +46,7 @@ create table ACT_RE_MODEL (
     DEPLOYMENT_ID_ varchar(64),
     EDITOR_SOURCE_VALUE_ID_ varchar(64),
     EDITOR_SOURCE_EXTRA_VALUE_ID_ varchar(64),
-    TENANT_ID_ varchar(255),
+    TENANT_ID_ varchar(255) default '',
     primary key (ID_)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_bin;
 
@@ -64,13 +65,15 @@ create table ACT_RU_EXECUTION (
     IS_EVENT_SCOPE_ TINYINT,
     SUSPENSION_STATE_ integer,
     CACHED_ENT_STATE_ integer,
-    TENANT_ID_ varchar(255),
+    TENANT_ID_ varchar(255) default '',
+    NAME_ varchar(255),
+    LOCK_TIME_ timestamp NULL,
     primary key (ID_)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_bin;
 
 create table ACT_RU_JOB (
     ID_ varchar(64) NOT NULL,
-  REV_ integer,
+    REV_ integer,
     TYPE_ varchar(255) NOT NULL,
     LOCK_EXP_TIME_ timestamp NULL,
     LOCK_OWNER_ varchar(255),
@@ -85,7 +88,7 @@ create table ACT_RU_JOB (
     REPEAT_ varchar(255),
     HANDLER_TYPE_ varchar(255),
     HANDLER_CFG_ varchar(4000),
-    TENANT_ID_ varchar(255),
+    TENANT_ID_ varchar(255) default '',
     primary key (ID_)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_bin;
 
@@ -101,7 +104,9 @@ create table ACT_RE_PROCDEF (
     DGRM_RESOURCE_NAME_ varchar(4000),
     DESCRIPTION_ varchar(4000),
     HAS_START_FORM_KEY_ TINYINT,
+    HAS_GRAPHICAL_NOTATION_ TINYINT,
     SUSPENSION_STATE_ integer,
+    TENANT_ID_ varchar(255) default '',
     primary key (ID_)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_bin;
 
@@ -123,7 +128,8 @@ create table ACT_RU_TASK (
     DUE_DATE_ datetime,
     CATEGORY_ varchar(255),
     SUSPENSION_STATE_ integer,
-    TENANT_ID_ varchar(255),
+    TENANT_ID_ varchar(255) default '',
+    FORM_KEY_ varchar(255),
     primary key (ID_)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_bin;
 
@@ -165,7 +171,25 @@ create table ACT_RU_EVENT_SUBSCR (
     ACTIVITY_ID_ varchar(64),
     CONFIGURATION_ varchar(255),
     CREATED_ timestamp not null DEFAULT CURRENT_TIMESTAMP,
+    PROC_DEF_ID_ varchar(64),
+    TENANT_ID_ varchar(255) default '',
     primary key (ID_)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_bin;
+
+create table ACT_EVT_LOG (
+    LOG_NR_ bigint auto_increment,
+    TYPE_ varchar(64),
+    PROC_DEF_ID_ varchar(64),
+    PROC_INST_ID_ varchar(64),
+    EXECUTION_ID_ varchar(64),
+    TASK_ID_ varchar(64),
+    TIME_STAMP_ timestamp not null,
+    USER_ID_ varchar(255),
+    DATA_ LONGBLOB,
+    LOCK_OWNER_ varchar(255),
+    LOCK_TIME_ timestamp null,
+    IS_PROCESSED_ tinyint default 0,
+    primary key (LOG_NR_)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_bin;
 
 create index ACT_IDX_EXEC_BUSKEY on ACT_RU_EXECUTION(BUSINESS_KEY_);

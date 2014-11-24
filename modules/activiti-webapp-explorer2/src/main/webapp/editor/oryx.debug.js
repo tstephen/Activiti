@@ -97,8 +97,6 @@ XMLNS = {
 	SCHEMA: ""
 };
 
-//TODO kann kickstart sich vielleicht auch um die erzeugung von paketen/
-// namespaces k�mmern? z.b. requireNamespace("ORYX.Core.SVG");
 var Kickstart = {
  	started: false,
 	callbacks: [],
@@ -1171,7 +1169,7 @@ var DataManager = {
 	 * need to graft elements in a certain xmlns and wish to assign attributes
 	 * in both that and another xmlns, you will need to do stepwise grafting,
 	 * adding non-default attributes yourself or you'll have to enhance this
-	 * function. Latter, I would appreciate: martin�apfelfabrik.de
+	 * function. Latter, I would appreciate: martin???apfelfabrik.de
 	 * @param {Object} namespace The namespace in which
 	 * 					elements should be grafted.
 	 * @param {Object} parent The element that should contain the grafted
@@ -2240,6 +2238,7 @@ ORYX = Object.extend(ORYX, {
 			messageParts[0] = (new Date()).getTime() + " "
 				+ prefix + " " + messageParts[0];
 			var message = printf.apply(null, messageParts);
+			
 			
 			ORYX.Log.__appenders.each(function(appender) {
 				appender.append(message);
@@ -4302,10 +4301,10 @@ ORYX.Core.SVG.Label = Clazz.extend({
 		"%W",
 		"@",
 		"m",
-		"wDGMOQÖ#+=<>~^",
-		"ABCHKNRSUVXZÜÄ&",
-		"bdghnopquxöüETY1234567890ß_§${}*´`µ€",
-		"aeksvyzäFLP?°²³",
+		"wDGMOQ??#+=<>~^",
+		"ABCHKNRSUVXZ????&",
+		"bdghnopqux????ETY1234567890??_??${}*??`?????",
+		"aeksvyz??FLP???????",
 		"c-",
 		"rtJ\"/()[]:;!|\\",
 		"fjI., ",
@@ -5031,7 +5030,7 @@ ORYX.Core.SVG.Label = Clazz.extend({
 	_getRenderedTextLength: function(tspan, startIndex, endIndex, fontSize) {
 		//if (/Firefox[\/\s](\d+\.\d+)/.test(navigator.userAgent) && new Number(RegExp.$1) >= 3) {
 			if(startIndex === undefined) {
-//test string: abcdefghijklmnopqrstuvwxyzöäü,.-#+ 1234567890ßABCDEFGHIJKLMNOPQRSTUVWXYZ;:_'*ÜÄÖ!"§$%&/()=?[]{}|<>'~´`\^°µ@€²³
+//test string: abcdefghijklmnopqrstuvwxyz??????,.-#+ 1234567890??ABCDEFGHIJKLMNOPQRSTUVWXYZ;:_'*??????!"??$%&/()=?[]{}|<>'~??`\^????@???????
 //				for(var i = 0; i < tspan.textContent.length; i++) {
 //					console.log(tspan.textContent.charAt(i), tspan.getSubStringLength(i,1), this._estimateCharacterWidth(tspan.textContent.charAt(i))*(fontSize/14.0));
 //				}
@@ -5691,7 +5690,7 @@ ORYX.Core.Math.getPointOfIntersectionPointLine = function(
 
 	/* 
 	 * [P3 - P1 - u(P2 - P1)] dot (P2 - P1) = 0
-	 * u =((x3-x1)(x2-x1)+(y3-y1)(y2-y1))/(p2-p1)²
+	 * u =((x3-x1)(x2-x1)+(y3-y1)(y2-y1))/(p2-p1)??
 	 */
 	var denominator = Math.pow(lineP2.x - lineP1.x, 2) 
 						+ Math.pow(lineP2.y - lineP1.y, 2);
@@ -11565,8 +11564,7 @@ ORYX.Editor = {
 			
 			var content =  "<div id='editor_header'>" +
                 "<div id='header_logo_image'>" +                
-                    "<img src='../explorer/src/img/signavio/smoky/logo2.png' border=\"0\" usemap=\"#kisbpmmap\"/>" + 
-                    "<map id=\"kisbpmmap\" name=\"kisbpmmap\"><area shape=\"rect\" alt=\"kisbpm.com\" title=\"kisbpm.com\" coords=\"15,2,322,44\" href=\"http://kisbpm.com\" target=\"_blank\" /></map>" +
+                    "<img src='../explorer/src/img/signavio/smoky/logo2.png' border=\"0\"/>" +
                 "</div>" +
                 "<span class='openid " + (publicText == user ? "not" : "") + "'>" + 
                   (unescape(user)) + 
@@ -13123,7 +13121,7 @@ ORYX.Editor.createByUrl = function(modelUrl, config){
  * need to graft elements in a certain xmlns and wish to assign attributes
  * in both that and another xmlns, you will need to do stepwise grafting,
  * adding non-default attributes yourself or you'll have to enhance this
- * function. Latter, I would appreciate: martin�apfelfabrik.de
+ * function. Latter, I would appreciate: martin???apfelfabrik.de
  * @param {Object} namespace The namespace in which
  * 					elements should be grafted.
  * @param {Object} parent The element that should contain the grafted
@@ -15497,11 +15495,12 @@ ORYX.Core.Node = {
 		
         var svgNode = svgDocument.getElementsByTagName("g")[0]; //outer most g node
         // set all required attributes
-        var attributeTitle = svgDocument.ownerDocument.createAttributeNS(null, "title");
+        
+        var attributeTitle = svgDocument.ownerDocument.createAttribute("title");
         attributeTitle.nodeValue = this.getStencil().title();
         svgNode.setAttributeNode(attributeTitle);
         
-        var attributeId = svgDocument.ownerDocument.createAttributeNS(null, "id");
+        var attributeId = svgDocument.ownerDocument.createAttribute("id");
         attributeId.nodeValue = this.id;
         svgNode.setAttributeNode(attributeId);
         
@@ -24881,7 +24880,7 @@ ORYX.Plugins.Save = Clazz.extend({
 			method			: method,
 			timeout			: 1800000,
 			disableCaching	: true,
-			headers			: {'Accept':"application/json", 'Content-Type':'charset=UTF-8'},
+			headers			: {'Accept':"application/json"},
 			params			: params,
 			success			: success,
 			failure			: failure
@@ -30035,7 +30034,7 @@ new function(){
 				width = this.adjustWidth(lanes, pool.bounds.width());		
 			}
 			
-			/**‚
+			/**???
 			 * Set width/height depending on containing lanes
 			 */		
 			else {

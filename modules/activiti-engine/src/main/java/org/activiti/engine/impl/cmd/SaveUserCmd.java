@@ -18,7 +18,6 @@ import org.activiti.engine.ActivitiIllegalArgumentException;
 import org.activiti.engine.identity.User;
 import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.interceptor.CommandContext;
-import org.activiti.engine.impl.persistence.entity.UserEntity;
 
 
 /**
@@ -27,30 +26,17 @@ import org.activiti.engine.impl.persistence.entity.UserEntity;
 public class SaveUserCmd implements Command<Void>, Serializable {
   
   private static final long serialVersionUID = 1L;
-  protected UserEntity user;
+  protected User user;
   
   public SaveUserCmd(User user) {
-    if (user == null) { 
-      throw new ActivitiIllegalArgumentException("user is null");
-    } else if (user instanceof UserEntity) { 
-      this.user = (UserEntity) user; 
-    } else { 
-      this.user = new UserEntity();
-      this.user.setId(user.getId());
-      // revision does not exist in interface so this will always result in 
-      // insert, see execute below.  
-      this.user.setFirstName(user.getFirstName());
-      this.user.setLastName(user.getLastName());
-      this.user.setEmail(user.getEmail());
-      this.user.setPassword(user.getPassword());
-    }
+    this.user = user;
   }
   
   public Void execute(CommandContext commandContext) {
     if(user == null) {
       throw new ActivitiIllegalArgumentException("user is null");
     }
-    if (user.getRevision()==0) {
+    if (commandContext.getUserIdentityManager().isNewUser(user)) {
       commandContext
         .getUserIdentityManager()
         .insertUser(user);

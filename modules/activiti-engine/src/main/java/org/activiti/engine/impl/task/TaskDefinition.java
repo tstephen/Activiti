@@ -45,9 +45,12 @@ public class TaskDefinition implements Serializable {
   protected Expression dueDateExpression;
   protected Expression priorityExpression;
   protected Expression categoryExpression;
+  protected Map<String, Set<Expression>> customUserIdentityLinkExpressions = new HashMap<String, Set<Expression>>(); 
+  protected Map<String, Set<Expression>> customGroupIdentityLinkExpressions = new HashMap<String, Set<Expression>>(); 
   
   // form fields
   protected TaskFormHandler taskFormHandler;
+  protected Expression formKeyExpression;
   
   // task listeners
   protected Map<String, List<TaskListener>> taskListeners = new HashMap<String, List<TaskListener>>();
@@ -106,6 +109,22 @@ public class TaskDefinition implements Serializable {
     candidateGroupIdExpressions.add(groupId);
   }
 
+  public Map<String, Set<Expression>> getCustomUserIdentityLinkExpressions() {
+    return customUserIdentityLinkExpressions;
+  }
+
+  public void addCustomUserIdentityLinkExpression(String identityLinkType, Set<Expression> idList) {
+  	customUserIdentityLinkExpressions.put(identityLinkType, idList);
+  }
+
+  public Map<String, Set<Expression>> getCustomGroupIdentityLinkExpressions() {
+    return customGroupIdentityLinkExpressions;
+  }
+
+  public void addCustomGroupIdentityLinkExpression(String identityLinkType, Set<Expression> idList) {
+  	customGroupIdentityLinkExpressions.put(identityLinkType, idList);
+  }
+
   public Expression getPriorityExpression() {
     return priorityExpression;
   }
@@ -121,8 +140,16 @@ public class TaskDefinition implements Serializable {
   public void setTaskFormHandler(TaskFormHandler taskFormHandler) {
     this.taskFormHandler = taskFormHandler;
   }
+  
+  public Expression getFormKeyExpression() {
+		return formKeyExpression;
+	}
 
-  public String getKey() {
+	public void setFormKeyExpression(Expression formKeyExpression) {
+		this.formKeyExpression = formKeyExpression;
+	}
+
+	public String getKey() {
     return key;
   }
 

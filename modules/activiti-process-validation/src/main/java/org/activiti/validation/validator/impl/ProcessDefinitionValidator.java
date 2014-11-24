@@ -16,7 +16,7 @@ public class ProcessDefinitionValidator extends ProcessLevelValidator {
 	@Override
 	protected void executeValidation(BpmnModel bpmnModel, Process process, List<ValidationError> errors) {
 		if (!process.isExecutable()) {
-			addError(errors, Problems.PROCESS_DEFINITION_IS_NOT_EXECUTABLE,
+            addError(errors, Problems.PROCESS_DEFINITION_NOT_EXECUTABLE,
 					process, process, "Process definition should be executable (property 'isExecutable' on process)");
 		}
 	}

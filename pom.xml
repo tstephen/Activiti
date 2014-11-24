@@ -14,13 +14,13 @@
   </parent>
 
   <packaging>pom</packaging>
-  <version>5.15-SNAPSHOT</version>
+  <version>5.17.0-SNAPSHOT</version>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <spring.framework.version>3.2.7.RELEASE</spring.framework.version>
-    <mule.version>3.3.0</mule.version>
-    <cxf.version>2.6.1</cxf.version>
-    <restlet.version>2.1.4</restlet.version>
+    <spring.framework.version>4.0.6.RELEASE</spring.framework.version>
+    <spring.security.version>3.2.3.RELEASE</spring.security.version>
+    <mule.version>3.5.0</mule.version>
+    <cxf.version>2.6.14</cxf.version>
     <batik.version>1.7</batik.version>
 
     <!-- OSGi bundles properties -->
@@ -71,7 +71,7 @@
       <dependency>
         <groupId>com.h2database</groupId>
         <artifactId>h2</artifactId>
-        <version>1.3.170</version>
+        <version>1.4.181</version>
       </dependency>
       <dependency>
         <groupId>commons-dbcp</groupId>
@@ -82,20 +82,19 @@
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
-        <version>1.7.2</version>
+        <version>1.7.6</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>jcl-over-slf4j</artifactId>
-        <version>1.7.2</version>
+        <version>1.7.6</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-log4j12</artifactId>
-        <version>1.7.2</version>
+        <version>1.7.6</version>
       </dependency>
       <dependency>
-        <!-- required by Apache commons httpclient, required by restlet -->
         <groupId>commons-logging</groupId>
         <artifactId>commons-logging</artifactId>
         <version>1.1.1</version>
@@ -103,7 +102,7 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
-        <version>3.1</version>
+        <version>3.3.2</version>
       </dependency>
       <dependency>
         <groupId>commons-io</groupId>
@@ -114,6 +113,11 @@
         <groupId>commons-fileupload</groupId>
         <artifactId>commons-fileupload</artifactId>
         <version>1.2.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+   	 	<artifactId>httpclient</artifactId>
+    	<version>4.3.5</version>
       </dependency>
       <dependency>
         <groupId>com.oracle.jdbc</groupId>
@@ -227,6 +231,11 @@
       </dependency>
       <dependency>
         <groupId>org.activiti</groupId>
+        <artifactId>activiti-crystalball</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti</groupId>
         <artifactId>activiti-webapp-rest2</artifactId>
         <type>war</type>
         <version>${project.version}</version>
@@ -239,6 +248,21 @@
       <dependency>
         <groupId>org.activiti</groupId>
         <artifactId>activiti-bpmn-layout</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti</groupId>
+        <artifactId>activiti-process-validation</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti</groupId>
+        <artifactId>activiti-image-generator</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti</groupId>
+        <artifactId>activiti-jmx</artifactId>
         <version>${project.version}</version>
       </dependency>
       <!-- EMAIL -->
@@ -323,7 +347,7 @@
       <dependency>
         <groupId>org.mybatis</groupId>
         <artifactId>mybatis</artifactId>
-        <version>3.2.2</version>
+        <version>3.2.5</version>
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>
@@ -352,7 +376,7 @@
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-jdk14</artifactId>
-        <version>1.7.2</version>
+        <version>1.7.6</version>
       </dependency>
       <dependency>
         <groupId>org.springframework</groupId>
@@ -396,9 +420,44 @@
         <version>${spring.framework.version}</version>
       </dependency>
       <dependency>
+      	<groupId>org.springframework</groupId>
+      	<artifactId>spring-context-support</artifactId>
+      	<version>${spring.framework.version}</version>
+	  </dependency>
+	  <dependency>
+      	<groupId>org.springframework</groupId>
+      	<artifactId>spring-web</artifactId>
+      	<version>${spring.framework.version}</version>
+      </dependency>
+      <dependency>
+      	<groupId>org.springframework</groupId>
+      	<artifactId>spring-webmvc</artifactId>
+      	<version>${spring.framework.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-test</artifactId>
         <version>${spring.framework.version}</version>
+      </dependency>
+      <dependency>
+      	<groupId>org.springframework.security</groupId>
+      	<artifactId>spring-security-core</artifactId>
+      	<version>${spring.security.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-config</artifactId>
+        <version>${spring.security.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-crypto</artifactId>
+        <version>${spring.security.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-web</artifactId>
+        <version>${spring.security.version}</version>
       </dependency>
       <dependency>
         <groupId>org.subethamail</groupId>
@@ -435,14 +494,19 @@
       </dependency>
       <!-- Activiti Modeler -->
       <dependency>
-        <groupId>org.codehaus.jackson</groupId>
-        <artifactId>jackson-core-asl</artifactId>
-        <version>1.9.9</version>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>2.2.3</version>
       </dependency>
       <dependency>
-        <groupId>org.codehaus.jackson</groupId>
-        <artifactId>jackson-mapper-asl</artifactId>
-        <version>1.9.9</version>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>2.2.3</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>2.2.3</version>
       </dependency>
       <dependency>
         <groupId>org.apache.xmlgraphics</groupId>
@@ -453,6 +517,12 @@
         <groupId>org.apache.xmlgraphics</groupId>
         <artifactId>batik-transcoder</artifactId>
         <version>${batik.version}</version>
+        <exclusions>
+          <exclusion>
+            <artifactId>commons-logging</artifactId>
+            <groupId>commons-logging</groupId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.apache.xmlgraphics</groupId>
@@ -529,11 +599,20 @@
         <artifactId>jtds</artifactId>
         <version>1.3.0</version>
       </dependency>
+        <dependency>
+            <groupId>com.googlecode.catch-exception</groupId>
+            <artifactId>catch-exception</artifactId>
+            <version>1.2.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
   </dependencyManagement>
 
   <modules>
     <module>modules/activiti-bpmn-model</module>
+    <module>modules/activiti-process-validation</module>
+    <module>modules/activiti-bpmn-layout</module>
+    <module>modules/activiti-image-generator</module>
     <module>modules/activiti-bpmn-converter</module>
     <module>modules/activiti-engine</module>
   </modules>
@@ -561,6 +640,8 @@
           <excludes>
             <exclude>**/*TestCase.java</exclude>
           </excludes>
+          <runOrder>alphabetical</runOrder>
+          <argLine>-Duser.language=en</argLine>
         </configuration>
       </plugin>
       <plugin>
@@ -653,6 +734,8 @@
       <id>deploy</id>
       <modules>
         <module>modules/activiti-bpmn-model</module>
+        <module>modules/activiti-process-validation</module>
+        <module>modules/activiti-image-generator</module>
         <module>modules/activiti-bpmn-converter</module>
         <module>modules/activiti-engine</module>
         <module>modules/activiti-bpmn-layout</module>
@@ -666,12 +749,14 @@
         <module>modules/activiti-rest</module>
         <module>modules/activiti-webapp-rest2</module>
         <module>modules/activiti-spring</module>
+        <module>modules/activiti-spring-boot</module>
         <module>modules/activiti-cxf</module>
         <module>modules/activiti-mule</module>
         <module>modules/activiti-camel</module>
         <module>modules/activiti-cdi</module>
         <module>modules/activiti-osgi</module>
         <module>modules/activiti-ldap</module>
+        <module>modules/activiti-crystalball</module>
       </modules>
       <build>
         <plugins>
@@ -717,12 +802,15 @@
     <profile>
       <id>check</id>
       <modules>
-        <module>modules/activiti-spring</module>
-        <module>modules/activiti-common-rest</module>
         <module>modules/activiti-bpmn-model</module>
+        <module>modules/activiti-process-validation</module>
+        <module>modules/activiti-image-generator</module>
         <module>modules/activiti-bpmn-converter</module>
         <module>modules/activiti-bpmn-layout</module>
         <module>modules/activiti-json-converter</module>
+        <module>modules/activiti-spring</module>
+        <module>modules/activiti-spring-boot</module>
+        <module>modules/activiti-common-rest</module>
         <module>modules/activiti-simple-workflow</module>
         <module>modules/activiti-rest</module>
         <module>modules/activiti-webapp-rest2</module>
@@ -738,7 +826,7 @@
       </modules>
     </profile>
     <profile>
-      <id>checkspring</id>
+      <id>checkspring</id> <!-- [Joram] Is this still used?? -->
       <modules>
         <module>modules/activiti-spring</module>
       </modules>
@@ -753,6 +841,12 @@
       <id>checksimpleworkflow</id>
       <modules>
         <module>modules/activiti-simple-workflow</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>checkosgi</id>
+      <modules>
+        <module>modules/activiti-osgi</module>
       </modules>
     </profile>
     <profile>
@@ -771,12 +865,15 @@
     <profile>
       <id>distro</id>
       <modules>
-        <module>modules/activiti-spring</module>
         <module>modules/activiti-bpmn-model</module>
+        <module>modules/activiti-process-validation</module>
+        <module>modules/activiti-image-generator</module>
         <module>modules/activiti-bpmn-converter</module>
         <module>modules/activiti-bpmn-layout</module>
         <module>modules/activiti-json-converter</module>
         <module>modules/activiti-simple-workflow</module>
+        <module>modules/activiti-spring</module>
+        <module>modules/activiti-spring-boot</module>
         <module>modules/activiti-common-rest</module>
         <module>modules/activiti-modeler</module>
         <module>modules/activiti-diagram-rest</module>
@@ -790,6 +887,8 @@
         <module>modules/activiti-mule</module>
         <module>modules/activiti-cdi</module>
         <module>modules/activiti-ldap</module>
+        <module>modules/activiti-crystalball</module>
+        <module>modules/activiti-hazelcast-async-executor</module>
       </modules>
     </profile>
     <profile>
@@ -809,6 +908,8 @@
       <id>buildWebappDependencies</id>
       <modules>
         <module>modules/activiti-bpmn-model</module>
+        <module>modules/activiti-process-validation</module>
+        <module>modules/activiti-image-generator</module>
         <module>modules/activiti-json-converter</module>
         <module>modules/activiti-bpmn-converter</module>
         <module>modules/activiti-engine</module>
@@ -819,6 +920,7 @@
         <module>modules/activiti-diagram-rest</module>
         <module>modules/activiti-bpmn-layout</module>
         <module>modules/activiti-simple-workflow</module>
+        <module>modules/activiti-crystalball</module>
       </modules>
       <properties>
         <skipTests>true</skipTests>
@@ -847,6 +949,8 @@
       <id>buildRestappDependencies</id>
       <modules>
         <module>modules/activiti-bpmn-model</module>
+        <module>modules/activiti-process-validation</module>
+        <module>modules/activiti-image-generator</module>
         <module>modules/activiti-json-converter</module>
         <module>modules/activiti-bpmn-converter</module>
         <module>modules/activiti-engine</module>

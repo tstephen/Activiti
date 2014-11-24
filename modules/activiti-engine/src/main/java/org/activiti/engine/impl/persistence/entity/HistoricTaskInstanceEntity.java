@@ -18,17 +18,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.activiti.engine.ProcessEngineConfiguration;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.impl.context.Context;
+import org.activiti.engine.impl.db.BulkDeleteable;
 import org.activiti.engine.impl.db.PersistentObject;
-import org.activiti.engine.impl.util.ClockUtil;
 
 
 /**
  * @author Tom Baeyens
  * @author Joram Barrez
  */
-public class HistoricTaskInstanceEntity extends HistoricScopeInstanceEntity implements HistoricTaskInstance, PersistentObject {
+public class HistoricTaskInstanceEntity extends HistoricScopeInstanceEntity implements HistoricTaskInstance, BulkDeleteable, PersistentObject {
 
   private static final long serialVersionUID = 1L;
   
@@ -44,7 +45,7 @@ public class HistoricTaskInstanceEntity extends HistoricScopeInstanceEntity impl
   protected Date dueDate;
   protected Date claimTime;
   protected String category;
-  protected String tenantId;
+  protected String tenantId = ProcessEngineConfiguration.NO_TENANT_ID;
   protected List<HistoricVariableInstanceEntity> queryVariables;
 
   public HistoricTaskInstanceEntity() {
@@ -62,11 +63,12 @@ public class HistoricTaskInstanceEntity extends HistoricScopeInstanceEntity impl
     this.description = task.getDescription();
     this.owner = task.getOwner();
     this.assignee = task.getAssignee();
-    this.startTime = ClockUtil.getCurrentTime();
+    this.startTime = Context.getProcessEngineConfiguration().getClock().getCurrentTime();
     this.taskDefinitionKey = task.getTaskDefinitionKey();
     
     this.setPriority(task.getPriority());
     this.setDueDate(task.getDueDate());
+    this.setCategory(task.getCategory());
     
     // Inherit tenant id (if applicable)
     if (task.getTenantId() != null) {
@@ -131,6 +133,10 @@ public class HistoricTaskInstanceEntity extends HistoricScopeInstanceEntity impl
   }
   public void setTaskDefinitionKey(String taskDefinitionKey) {
     this.taskDefinitionKey = taskDefinitionKey;
+  }
+  @Override
+  public Date getCreateTime() {
+  	return getStartTime(); // For backwards compatible reason implemented with createTime and startTime
   }
   public String getFormKey() {
     return formKey;

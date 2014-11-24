@@ -13,6 +13,7 @@
 
 package org.activiti.engine.impl.test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,7 @@ import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.impl.ProcessEngineImpl;
+import org.activiti.engine.impl.asyncexecutor.AsyncExecutor;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.activiti.engine.impl.db.DbSqlSession;
 import org.activiti.engine.impl.interceptor.Command;
@@ -44,7 +46,6 @@ import org.activiti.engine.impl.interceptor.CommandConfig;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.interceptor.CommandExecutor;
 import org.activiti.engine.impl.jobexecutor.JobExecutor;
-import org.activiti.engine.impl.util.ClockUtil;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -53,16 +54,16 @@ import org.junit.Assert;
 
 /**
  * @author Tom Baeyens
+ * @author Joram Barrez
  */
 public abstract class AbstractActivitiTestCase extends PvmTestCase {
 
-  private static final List<String> TABLENAMES_EXCLUDED_FROM_DB_CLEAN_CHECK = Arrays.asList(
-    "ACT_GE_PROPERTY"
-  );
+  private static final List<String> TABLENAMES_EXCLUDED_FROM_DB_CLEAN_CHECK = Arrays.asList("ACT_GE_PROPERTY");
 
   protected ProcessEngine processEngine; 
   
-  protected String deploymentId;
+  protected String deploymentIdFromDeploymentAnnotation;
+  protected List<String> deploymentIdsForAutoCleanup = new ArrayList<String>();
   protected Throwable exception;
 
   protected ProcessEngineConfigurationImpl processEngineConfiguration;
@@ -97,7 +98,7 @@ public abstract class AbstractActivitiTestCase extends PvmTestCase {
 
     try {
       
-      deploymentId = TestHelper.annotationDeploymentSetUp(processEngine, getClass(), getName());
+    	deploymentIdFromDeploymentAnnotation = TestHelper.annotationDeploymentSetUp(processEngine, getClass(), getName()); 
       
       super.runBare();
 
@@ -114,9 +115,18 @@ public abstract class AbstractActivitiTestCase extends PvmTestCase {
       throw e;
       
     } finally {
-      TestHelper.annotationDeploymentTearDown(processEngine, deploymentId, getClass(), getName());
+    	if (deploymentIdFromDeploymentAnnotation != null) {
+    		TestHelper.annotationDeploymentTearDown(processEngine, deploymentIdFromDeploymentAnnotation, getClass(), getName());
+    		deploymentIdFromDeploymentAnnotation = null;
+    	}
+    	
+    	for (String autoDeletedDeploymentId : deploymentIdsForAutoCleanup) {
+    		repositoryService.deleteDeployment(autoDeletedDeploymentId, true);
+    	}
+    	deploymentIdsForAutoCleanup.clear();
+    	
       assertAndEnsureCleanDb();
-      ClockUtil.reset();
+      processEngineConfiguration.getClock().reset();
       
       // Can't do this in the teardown, as the teardown will be called as part of the super.runBare
       closeDownProcessEngine();
@@ -136,7 +146,7 @@ public abstract class AbstractActivitiTestCase extends PvmTestCase {
       if (!TABLENAMES_EXCLUDED_FROM_DB_CLEAN_CHECK.contains(tableNameWithoutPrefix)) {
         Long count = tableCounts.get(tableName);
         if (count!=0L) {
-          outputMessage.append("  "+tableName + ": " + count + " record(s) ");
+          outputMessage.append("  ").append(tableName).append(": ").append(count).append(" record(s) ");
         }
       }
     }
@@ -193,8 +203,16 @@ public abstract class AbstractActivitiTestCase extends PvmTestCase {
   }
 
   public void waitForJobExecutorToProcessAllJobs(long maxMillisToWait, long intervalMillis) {
-    JobExecutor jobExecutor = processEngineConfiguration.getJobExecutor();
-    jobExecutor.start();
+    JobExecutor jobExecutor = null;
+    AsyncExecutor asyncExecutor = null;
+    if (processEngineConfiguration.isAsyncExecutorEnabled() == false) {
+      jobExecutor = processEngineConfiguration.getJobExecutor();
+      jobExecutor.start();
+      
+    } else {
+      asyncExecutor = processEngineConfiguration.getAsyncExecutor();
+      asyncExecutor.start();
+    }
 
     try {
       Timer timer = new Timer();
@@ -221,13 +239,25 @@ public abstract class AbstractActivitiTestCase extends PvmTestCase {
       }
 
     } finally {
-      jobExecutor.shutdown();
+      if (processEngineConfiguration.isAsyncExecutorEnabled() == false) {
+        jobExecutor.shutdown();
+      } else {
+        asyncExecutor.shutdown();
+      }
     }
   }
 
   public void waitForJobExecutorOnCondition(long maxMillisToWait, long intervalMillis, Callable<Boolean> condition) {
-    JobExecutor jobExecutor = processEngineConfiguration.getJobExecutor();
-    jobExecutor.start();
+    JobExecutor jobExecutor = null;
+    AsyncExecutor asyncExecutor = null;
+    if (processEngineConfiguration.isAsyncExecutorEnabled() == false) {
+      jobExecutor = processEngineConfiguration.getJobExecutor();
+      jobExecutor.start();
+      
+    } else {
+      asyncExecutor = processEngineConfiguration.getAsyncExecutor();
+      asyncExecutor.start();
+    }
 
     try {
       Timer timer = new Timer();
@@ -250,14 +280,53 @@ public abstract class AbstractActivitiTestCase extends PvmTestCase {
       }
 
     } finally {
-      jobExecutor.shutdown();
+      if (processEngineConfiguration.isAsyncExecutorEnabled() == false) {
+        jobExecutor.shutdown();
+      } else {
+        asyncExecutor.shutdown();
+      }
+    }
+  }
+  
+  public void executeJobExecutorForTime(long maxMillisToWait, long intervalMillis) {
+    JobExecutor jobExecutor = null;
+    AsyncExecutor asyncExecutor = null;
+    if (processEngineConfiguration.isAsyncExecutorEnabled() == false) {
+      jobExecutor = processEngineConfiguration.getJobExecutor();
+      jobExecutor.start();
+      
+    } else {
+      asyncExecutor = processEngineConfiguration.getAsyncExecutor();
+      asyncExecutor.start();
+    }
+
+    try {
+      Timer timer = new Timer();
+      InteruptTask task = new InteruptTask(Thread.currentThread());
+      timer.schedule(task, maxMillisToWait);
+      try {
+        while (!task.isTimeLimitExceeded()) {
+          Thread.sleep(intervalMillis);
+        }
+      } catch (InterruptedException e) {
+        // ignore
+      } finally {
+        timer.cancel();
+      }
+
+    } finally {
+      if (processEngineConfiguration.isAsyncExecutorEnabled() == false) {
+        jobExecutor.shutdown();
+      } else {
+        asyncExecutor.shutdown();
+      }
     }
   }
 
   public boolean areJobsAvailable() {
     return !managementService
       .createJobQuery()
-      .executable()
+      //.executable()
       .list()
       .isEmpty();
   }
@@ -286,7 +355,7 @@ public abstract class AbstractActivitiTestCase extends PvmTestCase {
     
     EndEvent endEvent = new EndEvent();
     endEvent.setId("theEnd");
-    process.addFlowElement(endEvent);;
+    process.addFlowElement(endEvent);
     
     process.addFlowElement(new SequenceFlow("start", "theTask"));
     process.addFlowElement(new SequenceFlow("theTask", "theEnd"));
@@ -319,7 +388,7 @@ public abstract class AbstractActivitiTestCase extends PvmTestCase {
     
     EndEvent endEvent = new EndEvent();
     endEvent.setId("theEnd");
-    process.addFlowElement(endEvent);;
+    process.addFlowElement(endEvent);
     
     process.addFlowElement(new SequenceFlow("start", "task1"));
     process.addFlowElement(new SequenceFlow("start", "task2"));
@@ -339,7 +408,7 @@ public abstract class AbstractActivitiTestCase extends PvmTestCase {
   	Deployment deployment = repositoryService.createDeployment()
   			.addBpmnModel("oneTasktest.bpmn20.xml", bpmnModel).deploy();
   	
-  	this.deploymentId = deployment.getId(); // For auto-cleanup
+  	deploymentIdsForAutoCleanup.add(deployment.getId()); // For auto-cleanup
   	
   	ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery()
   			.deploymentId(deployment.getId()).singleResult();
@@ -351,8 +420,8 @@ public abstract class AbstractActivitiTestCase extends PvmTestCase {
   	Deployment deployment = repositoryService.createDeployment()
   			.addBpmnModel("twoTasksTestProcess.bpmn20.xml", bpmnModel).deploy();
   	
-  	this.deploymentId = deployment.getId(); // For auto-cleanup
-  	
+  	deploymentIdsForAutoCleanup.add(deployment.getId()); // For auto-cleanup
+
   	ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery()
   			.deploymentId(deployment.getId()).singleResult();
   	return processDefinition.getId(); 

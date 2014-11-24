@@ -18,11 +18,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
-import org.activiti.engine.impl.cmd.DeleteJobsCmd;
+import org.activiti.engine.impl.cmd.CancelJobsCmd;
 import org.activiti.engine.impl.interceptor.CommandExecutor;
 import org.activiti.engine.impl.test.PluggableActivitiTestCase;
-import org.activiti.engine.impl.util.ClockUtil;
 import org.activiti.engine.impl.util.IoUtil;
 import org.activiti.engine.runtime.JobQuery;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -45,7 +43,7 @@ public class StartTimerEventTest extends PluggableActivitiTestCase {
     assertEquals(1, jobQuery.count());
 
     // After setting the clock to time '50minutes and 5 seconds', the second timer should fire
-    ClockUtil.setCurrentTime(new Date(startTime.getTime() + ((50 * 60 * 1000) + 5000)));
+    processEngineConfiguration.getClock().setCurrentTime(new Date(startTime.getTime() + ((50 * 60 * 1000) + 5000)));
     waitForJobExecutorToProcessAllJobs(5000L, 25L);
 
     List<ProcessInstance> pi = runtimeService.createProcessInstanceQuery().processDefinitionKey("startTimerEventExample")
@@ -60,27 +58,23 @@ public class StartTimerEventTest extends PluggableActivitiTestCase {
 
   @Deployment
   public void testFixedDateStartTimerEvent() throws Exception {
-
     // After process start, there should be timer created
     JobQuery jobQuery = managementService.createJobQuery();
     assertEquals(1, jobQuery.count());
 
-    ClockUtil.setCurrentTime(new SimpleDateFormat("dd/MM/yyyy hh:mm:ss").parse("15/11/2036 11:12:30"));
+    processEngineConfiguration.getClock().setCurrentTime(new SimpleDateFormat("dd/MM/yyyy hh:mm:ss").parse("15/11/2036 11:12:30"));
     waitForJobExecutorToProcessAllJobs(5000L, 25L);
 
-    List<ProcessInstance> pi = runtimeService.createProcessInstanceQuery().processDefinitionKey("startTimerEventExample")
-        .list();
+    List<ProcessInstance> pi = runtimeService.createProcessInstanceQuery().processDefinitionKey("startTimerEventExample").list();
     assertEquals(1, pi.size());
 
     assertEquals(0, jobQuery.count());
-
-
   }
 
   // FIXME: This test likes to run in an endless loop when invoking the waitForJobExecutorOnCondition method
   @Deployment
   public void testCycleDateStartTimerEvent() throws Exception {
-    ClockUtil.setCurrentTime(new Date());
+    processEngineConfiguration.getClock().setCurrentTime(new Date());
 
     // After process start, there should be timer created
     JobQuery jobQuery = managementService.createJobQuery();    
@@ -107,38 +101,27 @@ public class StartTimerEventTest extends PluggableActivitiTestCase {
     assertEquals(1, jobQuery.count());
     //have to manually delete pending timer
     cleanDB();
-
   }
 
   
   private void moveByMinutes(int minutes) throws Exception {
-    ClockUtil.setCurrentTime(new Date(ClockUtil.getCurrentTime().getTime() + ((minutes * 60 * 1000) + 5000)));
+    processEngineConfiguration.getClock().setCurrentTime(new Date(processEngineConfiguration.getClock().getCurrentTime().getTime() + ((minutes * 60 * 1000) + 5000)));
   }
 
   @Deployment
   public void testCycleWithLimitStartTimerEvent() throws Exception {
-    ClockUtil.setCurrentTime(new Date());
+    processEngineConfiguration.getClock().setCurrentTime(new Date());
 
     // After process start, there should be timer created
     JobQuery jobQuery = managementService.createJobQuery();
     assertEquals(1, jobQuery.count());
-
-    final ProcessInstanceQuery piq = runtimeService.createProcessInstanceQuery().processDefinitionKey("startTimerEventExampleCycle");
     
-    moveByMinutes(5);
-    waitForJobExecutorOnCondition(10000, 500, new Callable<Boolean>() {
-      public Boolean call() throws Exception {
-        return 1 ==  piq.count();
-      }      
-    });
+    moveByMinutes(6);
+    managementService.executeJob(managementService.createJobQuery().singleResult().getId());
     assertEquals(1, jobQuery.count());
 
-    moveByMinutes(5);
-    waitForJobExecutorOnCondition(10000, 500, new Callable<Boolean>() {
-      public Boolean call() throws Exception {
-        return 2 ==  piq.count();
-      }      
-    });
+    moveByMinutes(6);
+    managementService.executeJob(managementService.createJobQuery().singleResult().getId());
     assertEquals(0, jobQuery.count());
 
   }
@@ -149,7 +132,7 @@ public class StartTimerEventTest extends PluggableActivitiTestCase {
     JobQuery jobQuery = managementService.createJobQuery();
     assertEquals(1, jobQuery.count());
 
-    ClockUtil.setCurrentTime(new SimpleDateFormat("dd/MM/yyyy hh:mm:ss").parse("15/11/2036 11:12:30"));
+    processEngineConfiguration.getClock().setCurrentTime(new SimpleDateFormat("dd/MM/yyyy hh:mm:ss").parse("15/11/2036 11:12:30"));
     waitForJobExecutorToProcessAllJobs(5000L, 25L);
 
     List<ProcessInstance> pi = runtimeService.createProcessInstanceQuery().processDefinitionKey("startTimerEventExample")
@@ -161,7 +144,7 @@ public class StartTimerEventTest extends PluggableActivitiTestCase {
   
   @Deployment
   public void testVersionUpgradeShouldCancelJobs() throws Exception {
-    ClockUtil.setCurrentTime(new Date());
+    processEngineConfiguration.getClock().setCurrentTime(new Date());
 
     // After process start, there should be timer created
     JobQuery jobQuery = managementService.createJobQuery();
@@ -204,7 +187,7 @@ public class StartTimerEventTest extends PluggableActivitiTestCase {
     assertEquals(1, jobQuery.count());
     
     // Reset deployment cache
-    ((ProcessEngineConfigurationImpl) processEngineConfiguration).getProcessDefinitionCache().clear();
+    processEngineConfiguration.getProcessDefinitionCache().clear();
     
     // Start one instance of the process definition, this will trigger a cache reload
     runtimeService.startProcessInstanceByKey("startTimer");
@@ -245,7 +228,7 @@ public class StartTimerEventTest extends PluggableActivitiTestCase {
   private void cleanDB() {
     String jobId = managementService.createJobQuery().singleResult().getId();
     CommandExecutor commandExecutor = processEngineConfiguration.getCommandExecutor();
-    commandExecutor.execute(new DeleteJobsCmd(jobId));
+    commandExecutor.execute(new CancelJobsCmd(jobId));
   }
 
 }
