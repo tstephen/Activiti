@@ -284,10 +284,10 @@ public abstract class ProcessEngineConfiguration implements EngineServices {
   }
 
   public MailServerInfo getMailServer() {
-    if (mailServers.get(null) == null) {
-      mailServers.put(null,new MailServerInfo());
+    if (mailServers.get("") == null) {
+      mailServers.put("",new MailServerInfo());
     }
-    return mailServers.get(null);
+    return mailServers.get("");
   }
 
   public MailServerInfo getMailServer(String tenantId) {

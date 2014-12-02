@@ -72,8 +72,7 @@ public class MailActivityBehavior extends AbstractBpmnActivityBehavior {
 		  		: getStringFromField(getExpression(execution, htmlVar), execution);
       String charSetStr = getStringFromField(charset, execution);
 
-      Email email = createEmail(textStr, htmlStr);
-
+      email = createEmail(textStr, htmlStr);
       addTo(email, toStr);
       setFrom(email, fromStr, execution.getTenantId());
       addCc(email, ccStr);

@@ -895,6 +895,6 @@ public class ExecutionImpl implements
   }
   
   public String getTenantId() {
-    return null; // Not implemented
+    return getProcessInstance().getTenantId();
   }
 }
