@@ -73,11 +73,6 @@ public interface DelegateExecution extends VariableScope {
   String getCurrentActivityName();
   
   /**
-   * Returns the tenant id, if any is set before on the process definition or process instance.
-   */
-  String getTenantId();
-  
-  /**
    * All Activiti services can be accessed through this interface.
    */
   EngineServices getEngineServices();
