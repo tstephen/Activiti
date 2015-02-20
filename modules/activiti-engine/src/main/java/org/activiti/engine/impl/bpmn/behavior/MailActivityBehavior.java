@@ -13,13 +13,15 @@
 
 package org.activiti.engine.impl.bpmn.behavior;
 
+import java.util.Map;
+
 import javax.naming.NamingException;
 
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiIllegalArgumentException;
+import org.activiti.engine.cfg.MailServerInfo;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.delegate.Expression;
-import org.activiti.engine.impl.cfg.MailServerInfo;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.activiti.engine.impl.context.Context;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
@@ -140,20 +142,22 @@ public class MailActivityBehavior extends AbstractBpmnActivityBehavior {
     }
   }
 
-  protected void setFrom(Email email, String from) {
-    setFrom(email, from, null);
-  }
-
   protected void setFrom(Email email, String from, String tenantId) {
     String fromAddress = null;
 
     if (from != null) {
       fromAddress = from;
     } else { // use default configured from address in process engine config
-      try {
-        fromAddress = Context.getProcessEngineConfiguration().getMailServer(tenantId).getMailServerDefaultFrom();
-      } catch (NullPointerException e) {
-        throw new ActivitiException("No SMTP host set up for tenant: " + tenantId, e);
+      if (tenantId != null && tenantId.length() > 0) {
+        Map<String, MailServerInfo> mailServers = Context.getProcessEngineConfiguration().getMailServers();
+        if (mailServers != null && mailServers.containsKey(tenantId)) {
+          MailServerInfo mailServerInfo = mailServers.get(tenantId);
+          fromAddress = mailServerInfo.getMailServerDefaultFrom();
+        }
+      }
+      
+      if (fromAddress == null) {
+        fromAddress = Context.getProcessEngineConfiguration().getMailServerDefaultFrom();
       }
     }
 
@@ -194,35 +198,70 @@ public class MailActivityBehavior extends AbstractBpmnActivityBehavior {
     email.setSubject(subject != null ? subject : "");
   }
 
-  protected void setMailServerProperties(Email email) {
-    setMailServerProperties(email, null);
-  }
-
   protected void setMailServerProperties(Email email, String tenantId) {
     ProcessEngineConfigurationImpl processEngineConfiguration = Context.getProcessEngineConfiguration();
 
-    String mailSessionJndi = processEngineConfiguration.getMailSessionJndi(tenantId);
-    if (mailSessionJndi != null) {
-      try {
-        email.setMailSessionFromJNDI(mailSessionJndi);
-      } catch (NamingException e) {
-        throw new ActivitiException("Could not send email: Incorrect JNDI configuration", e);
+    boolean isMailServerSet = false;
+    if (tenantId != null && tenantId.length() > 0) {
+      if (processEngineConfiguration.getMailSessionJndi(tenantId) != null) {
+        setEmailSession(email, processEngineConfiguration.getMailSessionJndi(tenantId));
+        isMailServerSet = true;
+        
+      } else if (processEngineConfiguration.getMailServer(tenantId) != null) {
+        MailServerInfo mailServerInfo = processEngineConfiguration.getMailServer(tenantId);
+        String host = mailServerInfo.getMailServerHost();
+        if (host == null) {
+          throw new ActivitiException("Could not send email: no SMTP host is configured for tenantId " + tenantId);
+        }
+        email.setHostName(host);
+        
+        email.setSmtpPort(mailServerInfo.getMailServerPort());
+  
+        email.setSSL(mailServerInfo.isMailServerUseSSL());
+        email.setTLS(mailServerInfo.isMailServerUseTLS());
+  
+        String user = mailServerInfo.getMailServerUsername();
+        String password = mailServerInfo.getMailServerPassword();
+        if (user != null && password != null) {
+          email.setAuthentication(user, password);
+        }
+        
+        isMailServerSet = true;
       }
-    } else {
-      MailServerInfo mailServer = processEngineConfiguration.getMailServer(tenantId);
-      if (mailServer == null) {
-        throw new ActivitiException("Could not send email: no SMTP host is configured for tenant: "+tenantId);
+    }
+    
+    if (isMailServerSet == false) {
+      String mailSessionJndi = processEngineConfiguration.getMailSessionJndi();
+      if (mailSessionJndi != null) {
+        setEmailSession(email, mailSessionJndi);
+        
+      } else {
+        String host = processEngineConfiguration.getMailServerHost();
+        if (host == null) {
+          throw new ActivitiException("Could not send email: no SMTP host is configured");
+        }
+        email.setHostName(host);
+  
+        int port = processEngineConfiguration.getMailServerPort();
+        email.setSmtpPort(port);
+  
+        email.setSSL(processEngineConfiguration.getMailServerUseSSL());
+        email.setTLS(processEngineConfiguration.getMailServerUseTLS());
+  
+        String user = processEngineConfiguration.getMailServerUsername();
+        String password = processEngineConfiguration.getMailServerPassword();
+        if (user != null && password != null) {
+          email.setAuthentication(user, password);
+        }
       }
-      email.setHostName(mailServer.getMailServerHost());
-      email.setSmtpPort(mailServer.getMailServerPort());
-      email.setSSL(mailServer.getMailServerUseSSL());
-      email.setTLS(mailServer.getMailServerUseTLS());
-
-      String user = mailServer.getMailServerUsername();
-      String password = mailServer.getMailServerPassword();
-      if (user != null && password != null) {
-        email.setAuthentication(user, password);
-      }
+    }
+  }
+    
+  protected void setEmailSession(Email email, String mailSessionJndi) {
+    try {
+      email.setMailSessionFromJNDI(mailSessionJndi);
+    } catch (NamingException e) {
+      throw new ActivitiException("Could not send email: Incorrect JNDI configuration", e);
     }
   }
   

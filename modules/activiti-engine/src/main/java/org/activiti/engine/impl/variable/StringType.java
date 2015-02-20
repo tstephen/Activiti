@@ -13,6 +13,8 @@
 package org.activiti.engine.impl.variable;
 
 
+import sun.org.mozilla.javascript.Context;
+import sun.org.mozilla.javascript.EvaluatorException;
 
 /**
  * @author Tom Baeyens
@@ -35,8 +37,12 @@ public class StringType implements VariableType {
     return valueFields.getTextValue();
   }
 
-  public void setValue(Object value, ValueFields valueFields) {
+  public void setValue(String value, ValueFields valueFields) {
     valueFields.setTextValue((String) value);
+  }
+
+  public void setValue(Object value, ValueFields valueFields) {
+    valueFields.setTextValue((String) Context.jsToJava(value, String.class));
   }
 
   public boolean isAbleToStore(Object value) {
@@ -47,6 +53,11 @@ public class StringType implements VariableType {
       String stringValue = (String) value;
       return stringValue.length() <= maxLength;
     }
-    return false;
+    try {
+      Context.jsToJava(value, String.class);
+      return true;
+    } catch (EvaluatorException e) {
+      return false;
+    }
   }
 }

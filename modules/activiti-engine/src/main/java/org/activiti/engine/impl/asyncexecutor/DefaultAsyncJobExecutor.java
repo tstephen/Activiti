@@ -14,9 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Default async executor, the next generation.
- * 
- * @author Job Barrez
+ * @author Joram Barrez
  * @author Tijs Rademakers
  */
 public class DefaultAsyncJobExecutor implements AsyncExecutor {
@@ -320,5 +318,13 @@ private static Logger log = LoggerFactory.getLogger(DefaultAsyncJobExecutor.clas
 
   public void setDefaultAsyncJobAcquireWaitTimeInMillis(int defaultAsyncJobAcquireWaitTimeInMillis) {
     this.defaultAsyncJobAcquireWaitTimeInMillis = defaultAsyncJobAcquireWaitTimeInMillis;
+  }
+
+  public void setTimerJobRunnable(AcquireTimerJobsRunnable timerJobRunnable) {
+    this.timerJobRunnable = timerJobRunnable;
+  }
+
+  public void setAsyncJobsDueRunnable(AcquireAsyncJobsDueRunnable asyncJobsDueRunnable) {
+    this.asyncJobsDueRunnable = asyncJobsDueRunnable;
   }
 }

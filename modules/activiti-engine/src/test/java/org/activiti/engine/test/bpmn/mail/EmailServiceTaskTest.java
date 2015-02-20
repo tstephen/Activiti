@@ -52,11 +52,12 @@ public class EmailServiceTaskTest extends EmailTestCase {
             Arrays.asList("kermit@activiti.org"), null);
     assertProcessEnded(procId);
   }
-
+  
   public void testSimpleTextMailWhenMultiTenant() throws Exception {
-    String tenantId = "myTenant";
+    String tenantId = "myEmailTenant";
 
-    org.activiti.engine.repository.Deployment deployment = repositoryService.createDeployment().addClasspathResource("org/activiti/engine/test/bpmn/mail/EmailSendTaskTest.testSimpleTextMail.bpmn20.xml").tenantId(tenantId).deploy();
+    org.activiti.engine.repository.Deployment deployment = repositoryService.createDeployment()
+    		.addClasspathResource("org/activiti/engine/test/bpmn/mail/EmailSendTaskTest.testSimpleTextMail.bpmn20.xml").tenantId(tenantId).deploy();
     String procId = runtimeService.startProcessInstanceByKeyAndTenantId("simpleTextOnly", tenantId).getId();
 
     List<WiserMessage> messages = wiser.getMessages();
@@ -74,16 +75,19 @@ public class EmailServiceTaskTest extends EmailTestCase {
     String tenantId = "nonExistentTenant";
 
     org.activiti.engine.repository.Deployment deployment = repositoryService.createDeployment().addClasspathResource("org/activiti/engine/test/bpmn/mail/EmailSendTaskTest.testSimpleTextMail.bpmn20.xml").tenantId(tenantId).deploy();
-    try {
-      runtimeService.startProcessInstanceByKeyAndTenantId("simpleTextOnly", tenantId).getId();
-      fail("No exception thrown for unknown tenant");
-    } catch (ActivitiException e) {
-      ; // expected
-    }
+    String procId = runtimeService.startProcessInstanceByKeyAndTenantId("simpleTextOnly", tenantId).getId();
+    
+    List<WiserMessage> messages = wiser.getMessages();
+    assertEquals(1, messages.size());
+
+    WiserMessage message = messages.get(0);
+    assertEmailSend(message, false, "Hello Kermit!", "This a text only e-mail.", "activiti@localhost",
+        Arrays.asList("kermit@activiti.org"), null);
+    assertProcessEnded(procId);
 
     repositoryService.deleteDeployment(deployment.getId(), true);
   }
-
+  
   @Deployment
   public void testSimpleTextMailMultipleRecipients() {
     runtimeService.startProcessInstanceByKey("simpleTextOnlyMultipleRecipients");

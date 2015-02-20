@@ -13,19 +13,6 @@
 
 package org.activiti.rest.service.api.history;
 
-<<<<<<< HEAD
-import org.activiti.engine.ActivitiIllegalArgumentException;
-import org.activiti.engine.ActivitiObjectNotFoundException;
-import org.activiti.engine.history.HistoricProcessInstance;
-import org.activiti.engine.task.Comment;
-import org.activiti.rest.common.api.ActivitiUtil;
-import org.activiti.rest.common.api.SecuredResource;
-import org.activiti.rest.service.api.engine.CommentResponse;
-import org.activiti.rest.service.application.ActivitiRestServicesApplication;
-import org.restlet.data.Status;
-import org.restlet.resource.Delete;
-import org.restlet.resource.Get;
-=======
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -42,65 +29,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
->>>>>>> upstream/master
 
 
 /**
  * @author Frederik Heremans
  */
-<<<<<<< HEAD
-public class HistoricProcessInstanceCommentResource extends SecuredResource {
-
-  @Get
-  public CommentResponse getComment() {
-  	 if(!authenticate())
-       return null;
-     
-     HistoricProcessInstance instance = getHistoricProcessInstanceFromRequest();
-     
-     String commentId = getAttribute("commentId");
-     if(commentId == null) {
-       throw new ActivitiIllegalArgumentException("CommentId is required.");
-     }
-     
-     Comment comment = ActivitiUtil.getTaskService().getComment(commentId);
-     if(comment == null || comment.getProcessInstanceId() == null || !comment.getProcessInstanceId().equals(instance.getId())) {
-       throw new ActivitiObjectNotFoundException("Process instance '" + instance.getId() +"' doesn't have a comment with id '" + commentId + "'.", Comment.class);
-     }
-    
-    return getApplication(ActivitiRestServicesApplication.class).getRestResponseFactory()
-            .createRestComment(this, comment);
-  }
-  
-  @Delete
-  public void deleteComment() {
-    if(!authenticate())
-      return;
-    
-    HistoricProcessInstance instance = getHistoricProcessInstanceFromRequest();
-    
-    String commentId = getAttribute("commentId");
-    if(commentId == null) {
-      throw new ActivitiIllegalArgumentException("CommentId is required.");
-    }
-    
-    Comment comment = ActivitiUtil.getTaskService().getComment(commentId);
-    if(comment == null || comment.getProcessInstanceId() == null || !comment.getProcessInstanceId().equals(instance.getId())) {
-      throw new ActivitiObjectNotFoundException("Process instance '" + instance.getId() +"' doesn't have a comment with id '" + commentId + "'.", Comment.class);
-    }
-    
-    ActivitiUtil.getTaskService().deleteComment(commentId);
-    setStatus(Status.SUCCESS_NO_CONTENT);
-  }
-  
- protected HistoricProcessInstance getHistoricProcessInstanceFromRequest() {
-    String processInstanceId = getAttribute("processInstanceId");
-    if (processInstanceId == null) {
-      throw new ActivitiIllegalArgumentException("The processInstanceId cannot be null");
-    }
-    
-    HistoricProcessInstance processInstance = ActivitiUtil.getHistoryService().createHistoricProcessInstanceQuery()
-=======
 @RestController
 public class HistoricProcessInstanceCommentResource {
 
@@ -124,9 +57,7 @@ public class HistoricProcessInstanceCommentResource {
       throw new ActivitiObjectNotFoundException("Process instance '" + instance.getId() + "' doesn't have a comment with id '" + commentId + "'.", Comment.class);
     }
     
-    String serverRootUrl = request.getRequestURL().toString();
-    serverRootUrl = serverRootUrl.substring(0, serverRootUrl.indexOf("/history/historic-process-instances/"));
-    return restResponseFactory.createRestComment(comment, serverRootUrl);
+    return restResponseFactory.createRestComment(comment);
   }
   
   @RequestMapping(value="/history/historic-process-instances/{processInstanceId}/comments/{commentId}", method = RequestMethod.DELETE)
@@ -146,7 +77,6 @@ public class HistoricProcessInstanceCommentResource {
   
  protected HistoricProcessInstance getHistoricProcessInstanceFromRequest(String processInstanceId) {
     HistoricProcessInstance processInstance = historyService.createHistoricProcessInstanceQuery()
->>>>>>> upstream/master
            .processInstanceId(processInstanceId).singleResult();
     if (processInstance == null) {
       throw new ActivitiObjectNotFoundException("Could not find a process instance with id '" + processInstanceId + "'.", HistoricProcessInstance.class);
