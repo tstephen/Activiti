@@ -1258,6 +1258,7 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
       variableTypes.addType(new DateType());
       variableTypes.addType(new DoubleType());
       variableTypes.addType(new UUIDType());
+      variableTypes.addType(new JsonType(4001));
       variableTypes.addType(new ByteArrayType());
       variableTypes.addType(new SerializableType());
       variableTypes.addType(new CustomObjectType("item", ItemInstance.class));
