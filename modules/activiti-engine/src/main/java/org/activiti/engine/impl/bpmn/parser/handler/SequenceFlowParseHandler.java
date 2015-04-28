@@ -12,7 +12,12 @@
  */
 package org.activiti.engine.impl.bpmn.parser.handler;
 
+import java.util.List;
+import java.util.Map;
+
+import org.activiti.bpmn.constants.BpmnXMLConstants;
 import org.activiti.bpmn.model.BaseElement;
+import org.activiti.bpmn.model.ExtensionAttribute;
 import org.activiti.bpmn.model.SequenceFlow;
 import org.activiti.engine.delegate.Expression;
 import org.activiti.engine.impl.Condition;
@@ -22,12 +27,14 @@ import org.activiti.engine.impl.el.UelExpressionCondition;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
 import org.activiti.engine.impl.pvm.process.ScopeImpl;
 import org.activiti.engine.impl.pvm.process.TransitionImpl;
+import org.activiti.engine.impl.xpath.XPathExpressionCondition;
 import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Joram Barrez
+ * @author Tim Stephenson
  */
-public class SequenceFlowParseHandler extends AbstractBpmnParseHandler<SequenceFlow> {
+public class SequenceFlowParseHandler extends AbstractBpmnParseHandler<SequenceFlow> implements BpmnXMLConstants {
   
   public static final String PROPERTYNAME_CONDITION = "condition";
   public static final String PROPERTYNAME_CONDITION_TEXT = "conditionText";
@@ -58,7 +65,14 @@ public class SequenceFlowParseHandler extends AbstractBpmnParseHandler<SequenceF
     transition.setDestination(destinationActivity);
 
     if (StringUtils.isNotEmpty(sequenceFlow.getConditionExpression())) {
-      Condition expressionCondition = new UelExpressionCondition(bpmnParse.getExpressionManager().createExpression(sequenceFlow.getConditionExpression()));
+      Map<String,List<ExtensionAttribute>> definitionsAttributes = bpmnParse.getBpmnModel().getDefinitionsAttributes();
+      Condition expressionCondition;
+      if (definitionsAttributes.containsKey(EXPRESSION_LANGUAGE_ATTRIBUTE) && definitionsAttributes.get(EXPRESSION_LANGUAGE_ATTRIBUTE) != null
+              && definitionsAttributes.get("expressionLanguage").get(0).getValue().equals(XPATH_NAMESPACE)) {
+        expressionCondition = new XPathExpressionCondition(bpmnParse.getXPathExpressionManager().createExpression(sequenceFlow.getConditionExpression()));
+      } else {
+        expressionCondition = new UelExpressionCondition(bpmnParse.getExpressionManager().createExpression(sequenceFlow.getConditionExpression()));
+      }
       transition.setProperty(PROPERTYNAME_CONDITION_TEXT, sequenceFlow.getConditionExpression());
       transition.setProperty(PROPERTYNAME_CONDITION, expressionCondition);
     }
