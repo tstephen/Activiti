@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions
+  xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  xmlns:activiti="http://activiti.org/bpmn"
+  xmlns:bpmn-fn="http://www.omg.org/spec/BPMN/20100524/FN"
+  expressionLanguage="http://www.w3.org/1999/XPath"
+  targetNamespace="Examples">
+
+  <process id="testDataObjectProcess" name="Test execution available process">
+  
+    <startEvent id="theStart" />
+    <sequenceFlow id="flow1" sourceRef="theStart" targetRef="invoice_approved" />
+
+    <exclusiveGateway id="invoice_approved" name="Invoice&#xA;approved?" gatewayDirection="Diverging">
+      <incoming>flow1</incoming>
+      <outgoing>flow2</outgoing>
+      <outgoing>flow4</outgoing>
+    </exclusiveGateway>
+
+    <sequenceFlow id="flow2" sourceRef="invoice_approved" targetRef="userTask1" >
+      <!-- May not override expression language here as conditionExpression is Expression not FormalExpression -->
+      <conditionExpression><![CDATA[bpmn-fn:getDataObject('approved') = 'yes']]></conditionExpression>
+    </sequenceFlow>
+    <userTask id="userTask1" />
+    <sequenceFlow id="flow3" sourceRef="userTask1" targetRef="theEnd1" />
+    <endEvent id="theEnd1" />
+
+    <sequenceFlow id="flow4" sourceRef="invoice_approved" targetRef="userTask2" >
+      <conditionExpression><![CDATA[bpmn-fn:getDataObject('approved') != 'yes']]></conditionExpression>
+    </sequenceFlow>
+    <userTask id="userTask2" />
+    <sequenceFlow id="flow5" sourceRef="userTask2" targetRef="theEnd2" />
+    <endEvent id="theEnd2" />
+    
+  </process>
+
+</definitions>

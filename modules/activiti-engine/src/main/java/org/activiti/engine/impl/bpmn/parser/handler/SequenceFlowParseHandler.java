@@ -13,16 +13,22 @@
 package org.activiti.engine.impl.bpmn.parser.handler;
 
 import org.activiti.bpmn.model.BaseElement;
+import org.activiti.bpmn.model.ExtensionAttribute;
 import org.activiti.bpmn.model.SequenceFlow;
 import org.activiti.engine.delegate.Expression;
 import org.activiti.engine.impl.Condition;
 import org.activiti.engine.impl.bpmn.parser.BpmnParse;
+import org.activiti.engine.impl.context.Context;
 import org.activiti.engine.impl.el.ExpressionManager;
 import org.activiti.engine.impl.el.UelExpressionCondition;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
 import org.activiti.engine.impl.pvm.process.ScopeImpl;
 import org.activiti.engine.impl.pvm.process.TransitionImpl;
+import org.activiti.engine.impl.xpath.XPathExpressionCondition;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Joram Barrez
@@ -58,7 +64,14 @@ public class SequenceFlowParseHandler extends AbstractBpmnParseHandler<SequenceF
     transition.setDestination(destinationActivity);
 
     if (StringUtils.isNotEmpty(sequenceFlow.getConditionExpression())) {
-      Condition expressionCondition = new UelExpressionCondition(bpmnParse.getExpressionManager().createExpression(sequenceFlow.getConditionExpression()));
+      // TODO Apparently does not parse expressionLanguage
+      Map<String,List<ExtensionAttribute>> definitionsAttributes = bpmnParse.getBpmnModel().getDefinitionsAttributes();
+      Condition expressionCondition;
+      if (true) {
+        expressionCondition = new XPathExpressionCondition(bpmnParse.getXPathExpressionManager().createExpression(sequenceFlow.getConditionExpression()));
+      } else {
+        expressionCondition = new UelExpressionCondition(bpmnParse.getExpressionManager().createExpression(sequenceFlow.getConditionExpression()));
+      }
       transition.setProperty(PROPERTYNAME_CONDITION_TEXT, sequenceFlow.getConditionExpression());
       transition.setProperty(PROPERTYNAME_CONDITION, expressionCondition);
     }
