@@ -37,10 +37,10 @@ public class XPathExpressionManagerTest extends PluggableActivitiTestCase {
 
     vars.put("approved", "yes");
     ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("testDataObjectProcess", vars);
-
+    
     List<String> activeActivityIds = runtimeService.getActiveActivityIds(processInstance.getProcessInstanceId());
     assertNotNull(activeActivityIds);
-    assertEquals(1, activeActivityIds.size());
+    assertEquals(1,activeActivityIds.size());
     assertEquals(activeActivityIds.get(0), "userTask1");
 
     vars.put("approved", "no");
@@ -51,5 +51,4 @@ public class XPathExpressionManagerTest extends PluggableActivitiTestCase {
     assertEquals(1, activeActivityIds.size());
     assertEquals(activeActivityIds.get(0), "userTask2");
   }
-
 }
