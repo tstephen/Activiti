@@ -13,13 +13,15 @@
 package org.activiti.engine.impl.variable;
 
 
-import org.activiti.engine.impl.persistence.entity.json.JsonVariableScopeImpl;
-import sun.org.mozilla.javascript.Context;
-import sun.org.mozilla.javascript.EvaluatorException;
-
-import javax.json.*;
 import java.io.StringReader;
 import java.io.StringWriter;
+
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonStructure;
+import javax.json.JsonWriter;
 
 /**
  * @author Tim Stephenson
