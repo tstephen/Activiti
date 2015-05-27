@@ -214,6 +214,7 @@ import org.activiti.engine.impl.variable.StringType;
 import org.activiti.engine.impl.variable.UUIDType;
 import org.activiti.engine.impl.variable.VariableType;
 import org.activiti.engine.impl.variable.VariableTypes;
+import org.activiti.engine.impl.xpath.XPathExpressionManager;
 import org.activiti.engine.parse.BpmnParseHandler;
 import org.activiti.image.impl.DefaultProcessDiagramGenerator;
 import org.activiti.validation.ProcessValidator;
@@ -349,6 +350,7 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
   protected VariableTypes variableTypes;
   
   protected ExpressionManager expressionManager;
+  protected XPathExpressionManager xpathExpressionManager;
   protected List<String> customScriptingEngineClasses;
   protected ScriptingEngines scriptingEngines;
   protected List<ResolverFactory> resolverFactories;
@@ -430,6 +432,7 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
     initProcessDiagramGenerator();
     initHistoryLevel();
     initExpressionManager();
+    initXPathExpressionManager();
     initVariableTypes();
     initBeans();
     initFormEngines();
@@ -1014,6 +1017,7 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
     }
     
     bpmnParser.setExpressionManager(expressionManager);
+    bpmnParser.setXPathExpressionManager(xpathExpressionManager);
     bpmnParser.setBpmnParseFactory(bpmnParseFactory);
     bpmnParser.setActivityBehaviorFactory(activityBehaviorFactory);
     bpmnParser.setListenerFactory(listenerFactory);
@@ -1325,6 +1329,12 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
   protected void initExpressionManager() {
     if (expressionManager==null) {
       expressionManager = new ExpressionManager(beans);
+    }
+  }
+
+  protected void initXPathExpressionManager() {
+    if (xpathExpressionManager==null) {
+      xpathExpressionManager = new XPathExpressionManager(beans);
     }
   }
 
@@ -1693,7 +1703,14 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
     this.expressionManager = expressionManager;
     return this;
   }
-  
+
+  public XPathExpressionManager getXPathExpressionManager() { return xpathExpressionManager; }
+
+  public ProcessEngineConfigurationImpl setXPathExpressionManager(XPathExpressionManager expressionManager) {
+    this.xpathExpressionManager = expressionManager;
+    return this;
+  }
+
   public BusinessCalendarManager getBusinessCalendarManager() {
     return businessCalendarManager;
   }

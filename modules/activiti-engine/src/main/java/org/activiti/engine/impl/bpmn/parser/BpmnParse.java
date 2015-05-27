@@ -65,6 +65,7 @@ import org.activiti.engine.impl.util.io.ResourceStreamSource;
 import org.activiti.engine.impl.util.io.StreamSource;
 import org.activiti.engine.impl.util.io.StringStreamSource;
 import org.activiti.engine.impl.util.io.UrlStreamSource;
+import org.activiti.engine.impl.xpath.XPathExpressionManager;
 import org.activiti.validation.ProcessValidator;
 import org.activiti.validation.ValidationError;
 import org.apache.commons.lang3.StringUtils;
@@ -145,6 +146,7 @@ public class BpmnParse implements BpmnXMLConstants {
 
   // Factories
   protected ExpressionManager expressionManager;
+  protected XPathExpressionManager xpathExpressionManager;
   protected ActivityBehaviorFactory activityBehaviorFactory;
   protected ListenerFactory listenerFactory;
 
@@ -153,6 +155,7 @@ public class BpmnParse implements BpmnXMLConstants {
    */
   public BpmnParse(BpmnParser parser) {
     this.expressionManager = parser.getExpressionManager();
+    this.xpathExpressionManager = parser.getXPathExpressionManager();
     this.activityBehaviorFactory = parser.getActivityBehaviorFactory();
     this.listenerFactory = parser.getListenerFactory();
     this.bpmnParserHandlers = parser.getBpmnParserHandlers();
@@ -224,7 +227,7 @@ public class BpmnParse implements BpmnXMLConstants {
       	}
       }
       
-      // Validation successfull (or no validation)
+      // Validation successful (or no validation)
       createImports();
       createItemDefinitions();
       createMessages();
@@ -421,7 +424,7 @@ public class BpmnParse implements BpmnXMLConstants {
     // Activities are parsed first
     for (FlowElement flowElement : flowElements) {
 
-      // Sequence flow are also flow elements, but are only parsed once everyactivity is found
+      // Sequence flow are also flow elements, but are only parsed once every activity is found
       if (flowElement instanceof SequenceFlow) {
         sequenceFlowToParse.add((SequenceFlow) flowElement);
       } else if (flowElement instanceof BoundaryEvent) {
@@ -718,5 +721,11 @@ public class BpmnParse implements BpmnXMLConstants {
   public void removeCurrentScope() {
     currentScopeStack.pop();
   }
-  
+
+  public XPathExpressionManager getXPathExpressionManager() {
+    return xpathExpressionManager;
+  }
+  public void setXPathExpressionManager(XPathExpressionManager expressionManager) {
+    xpathExpressionManager = expressionManager;
+  }
 }

@@ -30,7 +30,6 @@ public class DefinitionsParser implements BpmnXMLConstants {
   
   protected static final List<ExtensionAttribute> defaultAttributes = Arrays.asList(
       new ExtensionAttribute(TYPE_LANGUAGE_ATTRIBUTE), 
-      new ExtensionAttribute(EXPRESSION_LANGUAGE_ATTRIBUTE), 
       new ExtensionAttribute(TARGET_NAMESPACE_ATTRIBUTE)
   );
   
