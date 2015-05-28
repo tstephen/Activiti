@@ -12,15 +12,7 @@
  */
 package org.activiti.engine.impl.xpath;
 
-import org.activiti.engine.ActivitiException;
-import org.activiti.engine.delegate.Expression;
-import org.activiti.engine.delegate.VariableScope;
-
 import java.util.Map;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -29,6 +21,13 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import javax.xml.xpath.XPathFunctionResolver;
+
+import org.activiti.engine.ActivitiException;
+import org.activiti.engine.delegate.Expression;
+import org.activiti.engine.delegate.VariableScope;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 
 /**
@@ -106,7 +105,8 @@ public class XPathExpressionManager /*extends ExpressionManager*/ {
     // TODO this is insufficient for all but simple data
     for(String varName : variableScope.getVariableNames()) {
       Element el = doc.createElement(varName);
-      el.setTextContent(variableScope.getVariable(varName).toString());
+      Object var = variableScope.getVariable(varName);
+      el.setTextContent(var == null ? "" : var.toString());
     }
     return doc;
   }
