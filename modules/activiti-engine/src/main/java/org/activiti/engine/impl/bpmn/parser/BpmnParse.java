@@ -328,6 +328,16 @@ public class BpmnParse implements BpmnXMLConstants {
         } catch (Exception e) {
           throw new ActivitiException("Could not find importer for type " + theImport.getImportType());
         }
+      } else if (theImport.getImportType().equals(SCHEMA_NAMESPACE)) {
+        Class< ? > xsdImporterClass;
+        try {
+          xsdImporterClass = Class.forName("org.activiti.engine.impl.xpath.XsdImporter", true, Thread.currentThread().getContextClassLoader());
+          XMLImporter newInstance = (XMLImporter) xsdImporterClass.newInstance();
+          this.importers.put(theImport.getImportType(), newInstance);
+          return newInstance;
+        } catch (Exception e) {
+          return null;
+        }
       }
       return null;
     }
