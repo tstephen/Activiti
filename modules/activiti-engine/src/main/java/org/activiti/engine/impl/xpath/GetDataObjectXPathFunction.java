@@ -12,12 +12,12 @@
  */
 package org.activiti.engine.impl.xpath;
 
-import org.activiti.engine.impl.context.Context;
-
 import java.util.List;
 
 import javax.xml.xpath.XPathFunction;
 import javax.xml.xpath.XPathFunctionException;
+
+import org.activiti.engine.impl.context.Context;
 
 public class GetDataObjectXPathFunction implements XPathFunction {
 
@@ -25,7 +25,14 @@ public class GetDataObjectXPathFunction implements XPathFunction {
   public Object evaluate(List args) throws XPathFunctionException {
     if (args.size() == 1) {
       String variableName = (String) args.get(0);
-      return Context.getExecutionContext().getExecution().getVariable(variableName);
+      Object o = Context.getExecutionContext().getExecution().getVariable(variableName);
+      if (o instanceof String && (((String) o).equalsIgnoreCase("true") || ((String) o).equalsIgnoreCase("false"))) {
+        return Boolean.parseBoolean((String) o);
+      } else if (o instanceof String && ((String) o).matches("[0-9]+")) {
+        return Double.parseDouble((String) o);
+      } else {
+        return o;
+      }
     } else {
       throw new RuntimeException("The XPath function getDataObject needs one variable name as an input, but the number of inputs was " + args.size() + ".");
     }
