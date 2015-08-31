@@ -65,10 +65,8 @@ public class ActivitiSpec {
         for (Entry<String, Object> entry : putVars.entrySet()) {
             vars.put(entry.getKey(), entry.getValue());
         }
-        // processInstance = activitiRule.getRuntimeService()
-        // .startProcessInstanceByKeyAndTenantId(key, vars, tenantId);
         processInstance = activitiRule.getRuntimeService()
-                .startProcessInstanceByKey(key, vars);
+                .startProcessInstanceByKeyAndTenantId(key, vars, tenantId);
         assertNotNull(processInstance);
         assertNotNull(processInstance.getId());
         return this;
@@ -89,19 +87,12 @@ public class ActivitiSpec {
             scanner = new Scanner(source);
             String json = scanner.useDelimiter("\\A").next();
 
-        // TODO move JSON to resource file
-        // String json = "{ \"firstName\": \"Tim\", "
-        // + "\"lastName\": \"Stephenson\", "
-        // + "\"email\": \"tim@knowprocess.com\", "
-        // + "\"phone1\": \"07798867607\", "
-        // + "\"message\": \"Test enquiry\"," + "\"stage\": \"Enquiry\","
-        // + "\"customFields\": []," + "\"tenantId\": \"" + tenantId
-        // + "\"" + " }";
             HashMap<String, Object> vars = new HashMap<String, Object>();
             vars.put("messageName", adapt(messageName));
             vars.put(adapt(messageName), json);
             processInstance = activitiRule.getRuntimeService()
-                    .startProcessInstanceByMessage(messageName, vars);
+                    .startProcessInstanceByMessageAndTenantId(messageName,
+                            vars, tenantId);
             assertNotNull(processInstance);
             assertNotNull(processInstance.getId());
         } finally {
@@ -212,7 +203,7 @@ public class ActivitiSpec {
     }
 
     public static Map<String, Object> buildMap(
-            ImmutablePair<String, Object>... immutablePair) {
+            @SuppressWarnings("unchecked") ImmutablePair<String, Object>... immutablePair) {
         Map<String,Object> map = new HashMap<String, Object>();
         for (ImmutablePair<String, Object> pair : immutablePair) {
             map.put(pair.getKey(), pair.getValue());
