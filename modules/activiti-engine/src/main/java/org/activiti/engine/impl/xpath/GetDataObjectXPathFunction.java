@@ -27,7 +27,7 @@ public class GetDataObjectXPathFunction implements XPathFunction {
     if (args.size() == 1) {
       String variableName = (String) args.get(0);
 
-            boolean active = Context.isExecutionContextActive();
+      // TODO need to replace ExecutionContext with activiti6 approach
       ExecutionContext ctxt = Context.getExecutionContext(); 
       Object o = ctxt.getExecution().getVariable(variableName);
       if (o instanceof String && (((String) o).equalsIgnoreCase("true") || ((String) o).equalsIgnoreCase("false"))) {
