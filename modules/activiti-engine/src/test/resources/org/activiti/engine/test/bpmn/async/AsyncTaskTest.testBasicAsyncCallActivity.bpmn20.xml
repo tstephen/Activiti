@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
              xmlns:activiti="http://activiti.org/bpmn"
-             typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath"
+             typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://activiti.org/Juel"
              targetNamespace="http://www.activiti.org/test">
   <process id="myProcess" name="My process" isExecutable="true">
     <startEvent id="startevent1" name="Start"></startEvent>

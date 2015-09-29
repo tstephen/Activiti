@@ -6,7 +6,7 @@
   xmlns:tns="org.activiti.enginge.impl.webservice"
   xmlns:webservice="http://webservice.activiti.org/"
   typeLanguage="http://www.w3.org/2001/XMLSchema"
-  expressionLanguage="http://www.w3.org/1999/XPath">
+  expressionLanguage="http://activiti.org/Juel">
 
   <import importType="http://schemas.xmlsoap.org/wsdl/"
           location="http://localhost:63081/webservicemock?wsdl"

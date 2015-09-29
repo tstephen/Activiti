@@ -3,7 +3,7 @@
              xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
              xmlns:activiti="http://activiti.org/bpmn"
              typeLanguage="http://www.w3.org/2001/XMLSchema"
-             expressionLanguage="http://www.w3.org/1999/XPath"
+             expressionLanguage="http://activiti.org/Juel"
              targetNamespace="http://www.activiti.org/bpmn2.0">
 
     <process id="integrationGatewayProcess">

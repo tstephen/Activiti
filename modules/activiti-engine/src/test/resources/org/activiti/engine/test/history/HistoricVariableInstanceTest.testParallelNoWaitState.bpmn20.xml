@@ -9,7 +9,7 @@
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
              exporter="Signavio Process Editor, http://www.signavio.com" 
              exporterVersion="" 
-             expressionLanguage="http://www.w3.org/1999/XPath" 
+             expressionLanguage="http://activiti.org/Juel" 
              id="sid-7b4298e2-d37d-4b00-ab34-579ea52b2d35" 
              targetNamespace="http://www.signavio.com/bpmn20" 
              typeLanguage="http://www.w3.org/2001/XMLSchema">

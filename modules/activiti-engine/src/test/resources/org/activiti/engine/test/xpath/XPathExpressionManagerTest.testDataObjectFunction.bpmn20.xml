@@ -3,7 +3,7 @@
   xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
   xmlns:activiti="http://activiti.org/bpmn"
   xmlns:bpmn-fn="http://www.omg.org/spec/BPMN/20100524/FN"
-  expressionLanguage="http://www.w3.org/1999/XPath"
+  expressionLanguage="http://activiti.org/Juel"
   targetNamespace="Examples">
 
   <process id="testDataObjectProcess" name="Test execution available process">

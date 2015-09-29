@@ -2,7 +2,7 @@
 <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
              xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
              xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
-             typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath"
+             typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://activiti.org/Juel"
              targetNamespace="http://www.activiti.org/test">
     <process id="errorProcess1" name="errorProcess1">
         <startEvent id="startevent1" name="Start"></startEvent>

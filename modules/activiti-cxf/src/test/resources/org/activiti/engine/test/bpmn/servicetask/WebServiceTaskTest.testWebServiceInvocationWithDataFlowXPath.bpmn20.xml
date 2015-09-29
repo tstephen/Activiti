@@ -4,7 +4,7 @@
   xmlns:activiti="http://activiti.org/bpmn"
   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
   typeLanguage="http://www.w3.org/2001/XMLSchema"
-  expressionLanguage="http://www.w3.org/1999/XPath" 
+  expressionLanguage="http://activiti.org/Juel" 
   targetNamespace="org.activiti.engine.test.bpmn.servicetask"
   xmlns:tns="org.activiti.engine.test.bpmn.servicetask"
   xmlns:counter="http://webservice.activiti.org/">
