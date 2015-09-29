@@ -61,6 +61,7 @@ import org.activiti.engine.impl.util.io.ResourceStreamSource;
 import org.activiti.engine.impl.util.io.StreamSource;
 import org.activiti.engine.impl.util.io.StringStreamSource;
 import org.activiti.engine.impl.util.io.UrlStreamSource;
+import org.activiti.engine.impl.xpath.XPathExpressionManager;
 import org.activiti.validation.ProcessValidator;
 import org.activiti.validation.ValidationError;
 import org.apache.commons.lang3.StringUtils;
@@ -137,6 +138,7 @@ public class BpmnParse implements BpmnParseXMLImportHandler, BpmnXMLConstants {
 
   // Factories
   protected ExpressionManager expressionManager;
+  protected XPathExpressionManager xpathExpressionManager;
   protected ActivityBehaviorFactory activityBehaviorFactory;
   protected ListenerFactory listenerFactory;
 
@@ -145,6 +147,7 @@ public class BpmnParse implements BpmnParseXMLImportHandler, BpmnXMLConstants {
    */
   public BpmnParse(BpmnParser parser) {
     this.expressionManager = parser.getExpressionManager();
+    this.xpathExpressionManager = parser.getXPathExpressionManager();
     this.activityBehaviorFactory = parser.getActivityBehaviorFactory();
     this.listenerFactory = parser.getListenerFactory();
     this.bpmnParserHandlers = parser.getBpmnParserHandlers();
@@ -331,6 +334,16 @@ public class BpmnParse implements BpmnParseXMLImportHandler, BpmnXMLConstants {
           return newInstance;
         } catch (Exception e) {
           throw new ActivitiException("Could not find importer for type " + theImport.getImportType());
+        }
+      } else if (theImport.getImportType().equals(SCHEMA_NAMESPACE)) {
+        Class< ? > xsdImporterClass;
+        try {
+          xsdImporterClass = Class.forName("org.activiti.engine.impl.xpath.XsdImporter", true, Thread.currentThread().getContextClassLoader());
+          XMLImporter newInstance = (XMLImporter) xsdImporterClass.newInstance();
+          this.importers.put(theImport.getImportType(), newInstance);
+          return newInstance;
+        } catch (Exception e) {
+          return null;
         }
       }
       return null;
@@ -694,5 +707,12 @@ public class BpmnParse implements BpmnParseXMLImportHandler, BpmnXMLConstants {
 
   public void removeCurrentSubProcess() {
     currentSubprocessStack.pop();
+  }
+
+  public XPathExpressionManager getXPathExpressionManager() {
+    return xpathExpressionManager;
+  }
+  public void setXPathExpressionManager(XPathExpressionManager expressionManager) {
+    xpathExpressionManager = expressionManager;
   }
 }

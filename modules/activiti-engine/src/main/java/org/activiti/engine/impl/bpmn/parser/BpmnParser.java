@@ -16,6 +16,7 @@ import org.activiti.engine.impl.bpmn.parser.factory.ActivityBehaviorFactory;
 import org.activiti.engine.impl.bpmn.parser.factory.ListenerFactory;
 import org.activiti.engine.impl.cfg.BpmnParseFactory;
 import org.activiti.engine.impl.el.ExpressionManager;
+import org.activiti.engine.impl.xpath.XPathExpressionManager;
 
 /**
  * Parser for BPMN 2.0 process models.
@@ -43,6 +44,7 @@ public class BpmnParser {
   public static final String OMG_DI_NS = "http://www.omg.org/spec/DD/20100524/DI";
 
   protected ExpressionManager expressionManager;
+  protected XPathExpressionManager xpathExpressionManager;
   protected ActivityBehaviorFactory activityBehaviorFactory;
   protected ListenerFactory listenerFactory;
   protected BpmnParseFactory bpmnParseFactory;
@@ -87,6 +89,12 @@ public class BpmnParser {
     this.expressionManager = expressionManager;
   }
 
+  public XPathExpressionManager getXPathExpressionManager() { return xpathExpressionManager; }
+
+  public void setXPathExpressionManager(XPathExpressionManager xpathExpressionManager) {
+    this.xpathExpressionManager = xpathExpressionManager;
+  }
+
   public BpmnParseHandlers getBpmnParserHandlers() {
     return bpmnParserHandlers;
   }
@@ -94,4 +102,5 @@ public class BpmnParser {
   public void setBpmnParserHandlers(BpmnParseHandlers bpmnParserHandlers) {
     this.bpmnParserHandlers = bpmnParserHandlers;
   }
+
 }

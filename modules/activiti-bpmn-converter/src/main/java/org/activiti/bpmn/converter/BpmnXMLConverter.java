@@ -323,16 +323,16 @@ public class BpmnXMLConverter implements BpmnXMLConstants {
           continue;
         }
 
-				if (ELEMENT_DEFINITIONS.equals(xtr.getLocalName())) {
-				  definitionsParser.parse(xtr, model);
-				  
+        if (ELEMENT_DEFINITIONS.equals(xtr.getLocalName())) {
+          definitionsParser.parse(xtr, model);
+
         } else if (ELEMENT_RESOURCE.equals(xtr.getLocalName())) {
           resourceParser.parse(xtr, model);
-          
-				} else if (ELEMENT_SIGNAL.equals(xtr.getLocalName())) {
-					signalParser.parse(xtr, model);
-					
-				} else if (ELEMENT_MESSAGE.equals(xtr.getLocalName())) {
+
+        } else if (ELEMENT_SIGNAL.equals(xtr.getLocalName())) {
+          signalParser.parse(xtr, model);
+
+        } else if (ELEMENT_MESSAGE.equals(xtr.getLocalName())) {
           messageParser.parse(xtr, model);
 
         } else if (ELEMENT_ERROR.equals(xtr.getLocalName())) {

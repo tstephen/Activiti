@@ -26,6 +26,7 @@ import org.activiti.engine.impl.cfg.StandaloneInMemProcessEngineConfiguration;
 import org.activiti.engine.impl.cfg.StandaloneProcessEngineConfiguration;
 import org.activiti.engine.impl.history.HistoryLevel;
 import org.activiti.engine.impl.jobexecutor.JobExecutor;
+import org.activiti.engine.impl.xpath.XPathExpressionManager;
 import org.activiti.engine.runtime.Clock;
 import org.activiti.image.ProcessDiagramGenerator;
 
@@ -802,4 +803,8 @@ public abstract class ProcessEngineConfiguration {
     this.asyncFailedJobWaitTime = asyncFailedJobWaitTime;
     return this;
   }
+
+  // TODO ideally we'd have an ExpressionManager interface and not need this
+  // Actual implementations for both Juel and Xpath are in child ProcesssEngineConfigurationImpl
+  public abstract XPathExpressionManager getXPathExpressionManager() ;
 }

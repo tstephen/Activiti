@@ -34,7 +34,9 @@ import java.util.Set;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
+import org.activiti.bpmn.constants.BpmnXMLConstants;
 import org.activiti.engine.ActivitiException;
+import org.activiti.engine.ActivitiIllegalArgumentException;
 import org.activiti.engine.FormService;
 import org.activiti.engine.HistoryService;
 import org.activiti.engine.IdentityService;
@@ -292,6 +294,7 @@ import org.activiti.engine.impl.variable.StringType;
 import org.activiti.engine.impl.variable.UUIDType;
 import org.activiti.engine.impl.variable.VariableType;
 import org.activiti.engine.impl.variable.VariableTypes;
+import org.activiti.engine.impl.xpath.XPathExpressionManager;
 import org.activiti.engine.parse.BpmnParseHandler;
 import org.activiti.engine.runtime.Clock;
 import org.activiti.image.impl.DefaultProcessDiagramGenerator;
@@ -489,6 +492,7 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
   protected VariableTypes variableTypes;
 
   protected ExpressionManager expressionManager;
+  protected XPathExpressionManager xpathExpressionManager;
   protected List<String> customScriptingEngineClasses;
   protected ScriptingEngines scriptingEngines;
   protected List<ResolverFactory> resolverFactories;
@@ -614,6 +618,7 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
     initProcessDiagramGenerator();
     initHistoryLevel();
     initExpressionManager();
+    initXPathExpressionManager();
     initVariableTypes();
     initBeans();
     initFormEngines();
@@ -1252,6 +1257,7 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
     }
 
     bpmnParser.setExpressionManager(expressionManager);
+    bpmnParser.setXPathExpressionManager(xpathExpressionManager);
     bpmnParser.setBpmnParseFactory(bpmnParseFactory);
     bpmnParser.setActivityBehaviorFactory(activityBehaviorFactory);
     bpmnParser.setListenerFactory(listenerFactory);
@@ -1568,6 +1574,12 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
   protected void initExpressionManager() {
     if (expressionManager == null) {
       expressionManager = new ExpressionManager(beans);
+    }
+  }
+
+  protected void initXPathExpressionManager() {
+    if (xpathExpressionManager==null) {
+      xpathExpressionManager = new XPathExpressionManager(beans);
     }
   }
 
@@ -1956,9 +1968,29 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
   public ExpressionManager getExpressionManager() {
     return expressionManager;
   }
+  
+    public org.activiti.engine.cfg.ExpressionManager getExpressionManager(
+            String expressionLanguage) {
+    if (BpmnXMLConstants.JUEL_NAMESPACE.equals(expressionLanguage)) {
+      return getExpressionManager();
+    } else if (BpmnXMLConstants.XPATH_NAMESPACE.equals(expressionLanguage)) {
+      return getXPathExpressionManager();
+    } else {
+      throw new ActivitiIllegalArgumentException(String.format(
+          "Support for expressionLanguage %1$s not installed",
+          expressionLanguage));
+    }
+  }
 
   public ProcessEngineConfigurationImpl setExpressionManager(ExpressionManager expressionManager) {
     this.expressionManager = expressionManager;
+    return this;
+  }
+
+  public XPathExpressionManager getXPathExpressionManager() { return xpathExpressionManager; }
+
+  public ProcessEngineConfigurationImpl setXPathExpressionManager(XPathExpressionManager expressionManager) {
+    this.xpathExpressionManager = expressionManager;
     return this;
   }
 
@@ -2774,4 +2806,5 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
     this.activiti5TypedEventListeners = activiti5TypedEventListeners;
     return this;
   }
+
 }

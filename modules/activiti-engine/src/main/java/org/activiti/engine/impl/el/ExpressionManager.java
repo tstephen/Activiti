@@ -45,7 +45,8 @@ import org.activiti.engine.impl.persistence.entity.VariableScopeImpl;
  * @author Dave Syer
  * @author Frederik Heremans
  */
-public class ExpressionManager {
+public class ExpressionManager implements
+        org.activiti.engine.cfg.ExpressionManager {
 
   protected ExpressionFactory expressionFactory;
   // Default implementation (does nothing)
