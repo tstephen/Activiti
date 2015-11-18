@@ -18,9 +18,11 @@ import java.io.StringWriter;
 
 import javax.json.Json;
 import javax.json.JsonArray;
-import javax.json.JsonObject;
+import javax.json.JsonException;
 import javax.json.JsonReader;
+import javax.json.JsonString;
 import javax.json.JsonStructure;
+import javax.json.JsonValue;
 import javax.json.JsonWriter;
 
 /**
@@ -39,20 +41,31 @@ public class JsonType extends StringType implements VariableType {
   }
 
   public void setValue(Object value, ValueFields valueFields) {
-    valueFields.setTextValue(stringify((JsonStructure) value));
+    if (value instanceof JsonString) {
+      valueFields.setTextValue(stringify((JsonString) value));
+    } else if (value instanceof JsonValue) {
+      valueFields.setTextValue(stringify((JsonValue) value));
+    } else {
+      valueFields.setTextValue(stringify((JsonStructure) value));
+    }
     valueFields.setCachedValue(valueFields.getTextValue());
   }
 
   public boolean isAbleToStore(Object value) {
-    if (value instanceof JsonStructure || (super.isAbleToStore(value) && appearsToBeJson(value))) {
+    if (value instanceof JsonValue || value instanceof JsonStructure
+        || (super.isAbleToStore(value) && appearsToBeJson(value))) {
       return true;
     }
     return false;
   }
 
-  public static JsonObject toObject(String value) {
+  public static Object toObject(String value) {
     JsonReader jsonReader = Json.createReader(new StringReader((String) value));
-    return jsonReader.readObject();
+    try {
+      return jsonReader.readObject();
+    } catch (JsonException e) {
+      return value;
+    }
   }
 
 
@@ -65,10 +78,24 @@ public class JsonType extends StringType implements VariableType {
     return value instanceof String && (value.toString().trim().startsWith("{") || value.toString().trim().startsWith("["));
   }
 
-  public static JsonStructure parse(String value) {
+  public static Object parse(String value) {
     return value.trim().startsWith("[") ? toArray(value) : toObject(value);
   }
 
+  public String stringify(JsonValue value) {
+    if (value == null)
+      return null;
+    return value.toString();
+  }
+
+  public String stringify(JsonString value) {
+    if (value == null)
+      return null;
+    else if (value.toString().startsWith("\""))
+      return value.toString().substring(1, value.toString().length()-1);
+    return value.toString();
+  }
+  
   public String stringify(JsonStructure value) {
     if (value == null)
       return null;

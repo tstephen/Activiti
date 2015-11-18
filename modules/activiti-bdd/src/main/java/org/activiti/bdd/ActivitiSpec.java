@@ -171,6 +171,12 @@ public class ActivitiSpec {
         return this;
     }
 
+    public ActivitiSpec assertProcessEndedAndInEndEvents(String... endEventIds) {
+        ProcessAssert.assertProcessEndedAndInEndEvents(processInstance,
+                endEventIds);
+        return this;
+    }
+
     public ActivitiSpec assertProcessEndedAndInExclusiveEndEvent(
             String endEventId) {
         ProcessAssert.assertProcessEndedAndInExclusiveEndEvent(processInstance,
@@ -178,11 +184,12 @@ public class ActivitiSpec {
         return this;
     }
 
-    private void collectVar(String varName) {
+    public ActivitiSpec collectVar(String varName) {
         Object var = activitiRule.getRuntimeService().getVariable(
                 processInstance.getId(), varName);
         assertNotNull(var);
         collectVars.put(varName, var);
+        return this;
     }
 
     private String adapt(String msgName) {
