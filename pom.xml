@@ -1,5 +1,4 @@
-﻿<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <name>Activiti</name>
@@ -14,7 +13,7 @@
   </parent>
 
   <packaging>pom</packaging>
-  <version>5.18.0-SNAPSHOT</version>
+  <version>5.18.0.20151117</version>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <spring.framework.version>4.1.5.RELEASE</spring.framework.version>
@@ -51,7 +50,7 @@
       ${activiti.artifact}*,
       ${activiti.osgi.export.additional}
     </activiti.osgi.export.pkg>
-    <activiti.osgi.private.pkg></activiti.osgi.private.pkg>
+    <activiti.osgi.private.pkg />
     <activiti.osgi.version>version=${project.version}</activiti.osgi.version>
     <activiti.osgi.split.pkg>-split-package:=first</activiti.osgi.split.pkg>
     <activiti.osgi.import>${activiti.osgi.import.pkg}</activiti.osgi.import>
@@ -60,7 +59,7 @@
     <activiti.osgi.exclude.dependencies>false</activiti.osgi.exclude.dependencies>
     <activiti.osgi.remove.headers>Ignore-Package,Include-Resource,Private-Package,Bundle-DocURL</activiti.osgi.remove.headers>
     <activiti.osgi.include.resource>{maven-resources}</activiti.osgi.include.resource>
-    <activiti.osgi.embed></activiti.osgi.embed>
+    <activiti.osgi.embed />
   </properties>
 
   <dependencyManagement>
@@ -720,7 +719,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore></ignore>
+                    <ignore />
                   </action>
                 </pluginExecution>
               </pluginExecutions>
@@ -1123,5 +1122,6 @@
     <url>git@github.com:Activiti/Activiti.git</url>
     <connection>scm:git:git@github.com:Activiti/Activiti.git</connection>
     <developerConnection>scm:git:git@github.com:Activiti/Activiti.git</developerConnection>
+    <tag>activiti-root-5.18.0.20151117</tag>
   </scm>
 </project>
