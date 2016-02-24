@@ -39,6 +39,9 @@ public class UelExpressionCondition implements Condition {
     if (result==null) {
       throw new ActivitiException("condition expression returns null");
     }
+    if (result instanceof String && Boolean.parseBoolean((String) result)) {
+      result = Boolean.TRUE;
+    }
     if (! (result instanceof Boolean)) {
       throw new ActivitiException("condition expression returns non-Boolean: "+result+" ("+result.getClass().getName()+")");
     }
